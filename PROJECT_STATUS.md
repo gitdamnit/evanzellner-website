@@ -10,16 +10,18 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** -
-- **Observed working tree:** unknown
-- **Observed at:** -
+- **Observed commit:** 48c8578e887933bbcc54dc6b1da5d6d1948517a9
+- **Observed working tree:** dirty
+- **Observed at:** 2026-10-30T14:03:55Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
 
-All evidence below was produced locally against the working tree on 30 October
-2026, before the first commit existed. No commit SHA is cited because none
-existed at the time. The artefacts are reproduced in the Tests table.
+- **Verification:** commit `0cc04db` — type check, production build, link check, and 15-assertion functional suite green against the local preview — evidence `scripts/test-site.mjs`, Tests table below
+- **Verification:** commit `48c8578` — GitHub Actions run [41068177574](https://github.com/gitdamnit/evanzellner-website/actions/runs/41068177574) succeeded and deployed; the same 15-assertion suite passes against `https://gitdamnit.github.io/evanzellner-website`, with every `_astro` asset and the résumé PDF returning 200 — evidence: live run of `scripts/test-site.mjs` on 30 October 2026
+
+Earlier local evidence was produced against the working tree before the first
+commit existed; those runs are reproduced in the Tests table.
 
 Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 
@@ -39,7 +41,9 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Tested] No horizontal overflow at 390 px on all five pages 0 console errors — `scripts/test-site.mjs`
 - [Implemented] GitHub Pages workflow using an Actions artifact — `.github/workflows/pages.yml`
 - [Implemented] Custom-domain instructions with exact DNS records, and a staged `CNAME` kept out of the build — `deploy/GITHUB-PAGES.md`, `deploy/CNAME`
-- [Blocked] Repository creation, push, and Pages enablement — needs the owner's repository scope and an explicit go-ahead in this session
+- [Deployed] Public repository created, `main` pushed, and GitHub Pages enabled with "GitHub Actions" as the source — https://github.com/gitdamnit/evanzellner-website
+- [Deployed] Staging site serving from GitHub Pages — https://gitdamnit.github.io/evanzellner-website/
+- [Tested] Live deployment verified: 6 routes, CSS and JS assets, favicon, Open Graph card, and the résumé PDF all return 200; 15-assertion suite green against the deployed URL — `scripts/test-site.mjs`, run 30 Oct 2026
 - [Blocked] Custom domain cutover — needs registrar DNS access, owned by Evan Zellner
 
 ## Tests
@@ -53,8 +57,9 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 | External repository and release links | manual `curl` sweep | Pass (15 URLs, all 200) | local run, 30 Oct 2026 |
 | Contrast | computed WCAG ratios for every text/surface pair | Pass (lowest 4.76:1, body text 14.79:1) | local calculation, 30 Oct 2026 |
 | Visual sweep | Playwright captures at 1440 px and 390 px | Pass (7 captures, no overflow, no console errors) | local run, 30 Oct 2026 |
-| GitHub Actions build | `pages.yml` on push | Not run | - |
-| Pages deployment smoke test | `curl` the Pages URL | Not run | - |
+| GitHub Actions build | `pages.yml` on push | Pass (run 41068177574, build + deploy jobs) | https://github.com/gitdamnit/evanzellner-website/actions/runs/41068177574 |
+| Pages deployment smoke test | `TEST_BASE_URL=https://gitdamnit.github.io/evanzellner-website npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
+| Deployed asset responses | `curl` each `_astro` asset and the PDF | Pass (all 200) | local run, 30 Oct 2026 |
 | Custom domain resolution | `dig evanzellner.com` | Not run — DNS not configured | - |
 
 ## Known Defects
@@ -84,9 +89,6 @@ Limitations worth recording, none of which are defects:
 
 ## Blockers
 
-- **GitHub repository and Pages enablement.** Owner action: approve creating the
-  public repository `gitdamnit/evanzellner-website`, pushing this source, and
-  enabling Pages with "GitHub Actions" as the source.
 - **Custom domain.** Owner action: add the four `A` records (and the `www` CNAME)
   listed in `deploy/GITHUB-PAGES.md`, then set the custom domain in repository
   settings. The `github.io` URL redirects to `evanzellner.com` only after that,
@@ -94,14 +96,17 @@ Limitations worth recording, none of which are defects:
 
 ## Next Actions
 
-1. Create the public repository, push `main`, and enable Pages from Actions.
-2. Confirm the workflow deploy, then record the Pages URL and its HTTP status here.
-3. Owner adds DNS records and sets the custom domain; then copy `deploy/CNAME` to
-   `public/CNAME` and re-deploy.
-4. Confirm HTTPS enforcement and re-run the smoke test against the apex domain.
-5. Re-check the project inventory against GitHub when a new release is tagged.
+1. Owner adds the four `A` records and the `www` CNAME from `deploy/GITHUB-PAGES.md`.
+2. Owner sets the custom domain to `evanzellner.com` in repository settings, then
+   copies `deploy/CNAME` to `public/CNAME` and pushes.
+3. Confirm the certificate and enable "Enforce HTTPS"; re-run the smoke test with
+   `TEST_BASE_URL=https://evanzellner.com`.
+4. Re-check the project inventory against GitHub when a new release is tagged.
 
 ## Release Status
 
-Source complete and verified locally. Not yet pushed or deployed. The custom
-domain is not configured and must not be described as live.
+Staging deployment is live at
+`https://gitdamnit.github.io/evanzellner-website/` and verified. The production
+domain `evanzellner.com` is **not** configured: no DNS record was added, no
+`CNAME` file is committed, and the domain must not be described as live until the
+owner completes the steps in `deploy/GITHUB-PAGES.md`.

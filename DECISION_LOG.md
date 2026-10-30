@@ -113,3 +113,14 @@ Allowed statuses: `Proposed`, `Accepted`, `Superseded`, `Deprecated`, `Rejected`
 - **Rationale:** Status is a fact about a repository, not a family resemblance.
 - **Consequences:** Editing either description must not borrow claims from the other.
 - **Supersedes:** None
+
+### D-0009 — Build the Pages staging site under its repository subpath
+
+- **Date:** 2026-10-30
+- **Status:** Accepted
+- **Context:** GitHub Pages serves a project site from `https://<user>.github.io/<repo>/`, not from the domain root. The first deployment returned 200 for the HTML but 404 for every stylesheet and navigation link, because Astro had emitted root-absolute URLs. The screenshot looked unstyled, and the deployment was therefore not usable as staging.
+- **Alternatives Considered:** Deploy to a user site repository (rejected: `gitdamnit.github.io` already exists as the profile repository); switch hosting (rejected: the owner asked for GitHub Pages); hard-code the subpath in every link (rejected: the production build must stay at `/`, so the subpath has to be a build-time input, not a source edit); accept a broken staging URL until the domain is cut over (rejected: an unverifiable deployment is not a deployment).
+- **Decision:** Astro's `base` is driven by the `BASE_PATH` environment variable, and every internal URL goes through `src/lib/paths.ts`. The workflow builds with `BASE_PATH=/evanzellner-website/`; local and custom-domain builds default to `/`.
+- **Rationale:** One helper keeps the staging and production builds identical apart from a prefix, and both can be verified with the same suite by changing `TEST_BASE_URL`.
+- **Consequences:** New internal links must use the helper; a raw `href="/..."` will work locally and fail on staging. `scripts/check-links.mjs` strips the base when resolving files, so the same check covers both.
+- **Supersedes:** None

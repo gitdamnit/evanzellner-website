@@ -17,7 +17,9 @@ remain. Nothing here claims `evanzellner.com` is live.
 https://gitdamnit.github.io/evanzellner-website/
 ```
 
-This URL works before the domain is cut over. Keep using it until DNS resolves.
+This URL works now and is verified. Keep using it until DNS resolves. Because it
+is a project site it lives under `/evanzellner-website/`, which is why the
+workflow builds with `BASE_PATH` set (D-0009).
 
 ## Custom domain: what the owner must do
 
@@ -95,7 +97,16 @@ that does not answer, which breaks the only working deployment.
 ## Verification run so far
 
 - Local build: `npm run build` — 6 pages.
-- Local link check: `npm run check:links` — 75 internal links, 22 asset
-  references, 0 failures.
-- DNS: **not configured**. No record was added by this work.
-- Pages: **not yet enabled**. Owned by the repository owner (step 4).
+- Local link check with `BASE_PATH=/evanzellner-website/` — 75 internal links,
+  22 asset references, 0 failures.
+- GitHub Actions: run `41068177574` on commit `48c8578` — build and deploy jobs
+  succeeded.
+- Staging smoke test against `https://gitdamnit.github.io/evanzellner-website` —
+  15 assertions pass: nav order, 7 completed and 9 in-development entries,
+  résumé PDF (200, PDF media type, 121,322 bytes), contact-draft behaviour, and
+  no horizontal overflow at 390 px.
+- Deployed assets: every `_astro` stylesheet, the favicon, the Open Graph card,
+  and the résumé PDF return 200.
+- DNS: **not configured**. No record was added by this work. `dig
+  evanzellner.com` will not return GitHub's addresses until the owner acts.
+- Custom domain: **not set** in repository settings, and no `CNAME` is committed.

@@ -45,9 +45,11 @@ ProDoc Guard (released) and ProDoc Memory (in development) are separate projects
 
 ## Deployment and domain
 
-See [`deploy/GITHUB-PAGES.md`](deploy/GITHUB-PAGES.md). The staging URL works
-today; the custom domain requires registrar access and has **not** been
-configured.
+Live staging: **https://gitdamnit.github.io/evanzellner-website/** (verified).
+
+See [`deploy/GITHUB-PAGES.md`](deploy/GITHUB-PAGES.md) for the workflow and the
+exact DNS records. The custom domain `evanzellner.com` requires registrar access
+and has **not** been configured; nothing is live there.
 
 ## Documents
 
