@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** 2c49752d9330366d588bc603c960454a3e34a75c
-- **Observed working tree:** clean
-- **Observed at:** 2026-10-30T14:34:52Z
+- **Observed commit:** 4ce6d8921f5c40d0ae8b6be8ce083a77b2b6781c
+- **Observed working tree:** dirty
+- **Observed at:** 2026-10-30T15:42:30Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -44,7 +44,10 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Deployed] Public repository created, `main` pushed, and GitHub Pages enabled with "GitHub Actions" as the source — https://github.com/gitdamnit/evanzellner-website
 - [Deployed] Staging site serving from GitHub Pages — https://gitdamnit.github.io/evanzellner-website/
 - [Tested] Live deployment verified: 6 routes, CSS and JS assets, favicon, Open Graph card, and the résumé PDF all return 200; 15-assertion suite green against the deployed URL — `scripts/test-site.mjs`, run 30 Oct 2026
-- [Blocked] Custom domain cutover — needs registrar DNS access, owned by Evan Zellner
+- [Deployed] Custom domain cut over: apex `A`/`AAAA` replaced with GitHub's addresses, `www` pointed at `gitdamnit.github.io`, four dead subdomains removed, all records DNS-only (D-0010) — Cloudflare zone `8085a44df807cf8aa8a14c515de1c71d`, 30 Oct 2026
+- [Implemented] `BASE_PATH` removed from the Pages workflow and `deploy/CNAME` copied to `public/CNAME`, so builds serve from `/` — `.github/workflows/pages.yml`, `public/CNAME`
+- [Deployed] GitHub Pages custom domain set to `evanzellner.com` with a certificate covering apex and `www`; "Enforce HTTPS" enabled — repository Pages settings, 30 Oct 2026
+- [Tested] `https://evanzellner.com/` returns 200 from GitHub, serves the correct `<title>`, redirects `http`→`https` and `www`→apex, and passes all 15 assertions — `TEST_BASE_URL=https://evanzellner.com npm run test:site`, 30 Oct 2026
 
 ## Tests
 
@@ -59,8 +62,11 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 | Visual sweep | Playwright captures at 1440 px and 390 px | Pass (7 captures, no overflow, no console errors) | local run, 30 Oct 2026 |
 | GitHub Actions build | `pages.yml` on push | Pass (run 41068177574, build + deploy jobs) | https://github.com/gitdamnit/evanzellner-website/actions/runs/41068177574 |
 | Pages deployment smoke test | `TEST_BASE_URL=https://gitdamnit.github.io/evanzellner-website npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
-| Deployed asset responses | `curl` each `_astro` asset and the PDF | Pass (all 200) | local run, 30 Oct 2026 |
-| Custom domain resolution | `dig evanzellner.com` | Not run — DNS not configured | - |
+| Custom domain functional suite | `TEST_BASE_URL=https://evanzellner.com npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
+| Custom domain resolution | `dig evanzellner.com` at 1.1.1.1, 8.8.8.8, and authoritative | Pass (4×`185.199.*` A, 4×`2606:50c0:*` AAAA) | local run, 30 Oct 2026 |
+| Custom domain certificate | `openssl s_client` + Pages certificate state | Pass (`approved`, apex and `www`, expires 15 Jan 2027) | local run, 30 Oct 2026 |
+| HTTPS enforcement | `curl -I http://evanzellner.com/` | Pass (301 → `https://evanzellner.com/`) | local run, 30 Oct 2026 |
+| Deployed assets | `curl` each `_astro` asset, favicon, OG card, PDF | Pass (all 200) | local run, 30 Oct 2026 |
 
 ## Known Defects
 
@@ -86,37 +92,37 @@ Limitations worth recording, none of which are defects:
   tested.
 - No analytics or privacy policy exists; the site sets no cookies and makes no
   third-party requests other than links the visitor chooses to follow.
+- The `github.io` project URL is no longer usable as staging: once a custom domain
+  is set, GitHub Pages redirects it to `https://evanzellner.com/`. Future staging
+  needs a separate origin (D-0010).
+- Four hostnames that previously pointed at the apex (`about`, `projects`,
+  `secrets`, `writing`) were deleted and no longer resolve. They were already
+  failing TLS, so nothing that worked was removed (D-0010).
+- `resume.evanzellner.com` (→ `evan-resume-alk.pages.dev`) and
+  `ferngeist.evanzellner.com` (→ a Cloudflare Tunnel) return 404. They were
+  broken before this work, are unrelated to this repository, and were left alone.
+  `opencode.evanzellner.com` serves content and is likewise untouched.
 
 ## Blockers
 
-- **Custom domain.** `evanzellner.com` is already live and is **not** served by
-  this repository. As observed on 30 October 2026: `A 2.57.91.91`, `AAAA
-  2a02:4780:84::32` (Hostinger), nameservers `pearl.ns.cloudflare.com` and
-  `sullivan.ns.cloudflare.com`, and `https://evanzellner.com/` returns 200 from
-  a Framer site (`more-surface-302655.framer.app`). Pointing it here is a
-  cutover that replaces a working site, so it is the owner's call and needs
-  Cloudflare DNS access. The records to set are in `deploy/GITHUB-PAGES.md`.
-  The `github.io` URL redirects to the domain only after that, which is why no
-  `CNAME` is committed yet.
+- **None for this release.** The custom domain cutover that was previously
+  blocked is complete (D-0010).
 
 ## Next Actions
 
-1. Owner decides whether to cut over from the current Framer/Hostinger site. If
-   yes: replace the apex `A`/`AAAA` records with GitHub's four `A` records, point
-   `www` at `gitdamnit.github.io`, set the records to DNS-only while GitHub issues
-   the certificate, and keep the old records for rollback.
-2. Owner sets the custom domain to `evanzellner.com` in repository settings, then
-   copies `deploy/CNAME` to `public/CNAME` and pushes.
-3. Remove `BASE_PATH` from `.github/workflows/pages.yml` so the custom-domain
-   build serves from `/` (D-0009), then confirm the certificate and enable
-   "Enforce HTTPS"; re-run the smoke test with
-   `TEST_BASE_URL=https://evanzellner.com`.
-4. Re-check the project inventory against GitHub when a new release is tagged.
+1. Re-check the project inventory against GitHub when a new release is tagged
+   (`src/data/projects.ts`).
+2. Decide what `resume.evanzellner.com` and `ferngeist.evanzellner.com` should
+   serve — both currently 404 and are outside this repository's scope.
+3. Rotate the Cloudflare API token used for the cutover and the R2 credential that
+   was exposed in the working transcript; neither is stored in this repository.
+4. Confirm `http://` and `https://www` redirects still behave after the certificate
+   renews in January 2027.
 
 ## Release Status
 
-Staging deployment is live at
-`https://gitdamnit.github.io/evanzellner-website/` and verified. The production
-domain `evanzellner.com` is **not** configured: no DNS record was added, no
-`CNAME` file is committed, and the domain must not be described as live until the
-owner completes the steps in `deploy/GITHUB-PAGES.md`.
+Production is live at `https://evanzellner.com/`, served by GitHub Pages from this
+repository and verified on 30 October 2026: apex and `www` return 200, certificates
+are approved, HTTPS is enforced, and all 15 functional assertions pass against the
+domain. The `github.io` project URL now redirects to the custom domain.
+
