@@ -35,9 +35,14 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # A project Pages site lives at /<repo>/, so assets and links need the base.
+          BASE_PATH: /evanzellner-website/
 
       - name: Check internal links
         run: npm run check:links
+        env:
+          BASE_PATH: /evanzellner-website/
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

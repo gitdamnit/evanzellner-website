@@ -55,20 +55,22 @@ export const aboutPage = {
   ],
 } as const;
 
+import { href } from '../lib/paths';
+
 export const doors = [
   {
     label: 'Projects',
-    href: '/projects/',
+    href: href('/projects/'),
     description: 'Case studies, including the parts that did not work.',
   },
   {
     label: 'Résumé',
-    href: '/resume/',
+    href: href('/resume/'),
     description: 'The background, the numbers, and the document.',
   },
   {
     label: 'Contact',
-    href: '/contact/',
+    href: href('/contact/'),
     description: 'Email, LinkedIn, and GitHub.',
   },
 ] as const;

@@ -1,3 +1,5 @@
+import { href } from '../lib/paths';
+
 export const identity = {
   name: 'Evan Zellner',
   shortName: 'Evan Zellner.',
@@ -10,11 +12,11 @@ export const identity = {
 } as const;
 
 export const navItems = [
-  { key: 'home', label: 'Home', href: '/' },
-  { key: 'projects', label: 'Projects', href: '/projects/' },
-  { key: 'resume', label: 'Résumé', href: '/resume/' },
-  { key: 'about', label: 'About', href: '/about/' },
-  { key: 'contact', label: 'Contact', href: '/contact/' },
+  { key: 'home', label: 'Home', href: href('/') },
+  { key: 'projects', label: 'Projects', href: href('/projects/') },
+  { key: 'resume', label: 'Résumé', href: href('/resume/') },
+  { key: 'about', label: 'About', href: href('/about/') },
+  { key: 'contact', label: 'Contact', href: href('/contact/') },
 ] as const;
 
 export type NavKey = (typeof navItems)[number]['key'];
@@ -24,7 +26,7 @@ export const home = {
   hero: {
     nameLines: ['Evan', 'Zellner.'],
     caption: 'A little about me.',
-    href: '/about/',
+    href: href('/about/'),
     ariaLabel: 'A little about me — go to the About page',
   },
   about: {
@@ -36,7 +38,7 @@ export const home = {
       'I like figuring things out. Sometimes that means building a tool. Sometimes it means challenging an assumption. Sometimes it means finding out why a perfectly good lemon just split in half.',
       'People, technology, writing, plants. I tend to follow the interesting part.',
     ],
-    link: { label: 'More about me', href: '/about/' },
+    link: { label: 'More about me', href: href('/about/') },
   },
   resume: {
     index: '02',
@@ -47,7 +49,7 @@ export const home = {
       'My background spans talent acquisition, human resources, training, and operations. Useful experience. One part of a much bigger picture.',
     ],
     tags: ['HR — HR Management', 'PHR', 'SHRM-CP'],
-    link: { label: 'View my résumé', href: '/resume/' },
+    link: { label: 'View my résumé', href: href('/resume/') },
   },
   projects: {
     index: '03',
@@ -59,11 +61,11 @@ export const home = {
       'Tools for AI workflows. Plugins that solve actual problems. Experiments that turn into something useful.',
     ],
     links: [
-      { label: 'Explore the projects', href: '/projects/' },
-      { label: 'Current development', href: '/projects/#current-development' },
+      { label: 'Explore the projects', href: href('/projects/') },
+      { label: 'Current development', href: href('/projects/#current-development') },
     ],
     footer: 'Small tools. Real problems.',
-    link: { label: 'All projects', href: '/projects/' },
+    link: { label: 'All projects', href: href('/projects/') },
   },
 } as const;
 

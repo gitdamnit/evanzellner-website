@@ -1,6 +1,7 @@
 ---
 import ArrowUpRight from './ArrowUpRight.astro';
 import { identity, navItems, type NavKey } from '../data/site';
+import { href } from '../lib/paths';
 
 interface Props {
   active: NavKey;
@@ -10,7 +11,7 @@ const { active } = Astro.props;
 
 <header class="site-header">
   <div class="shell site-header__inner">
-    <a class="brand" href="/" aria-label="Evan Zellner — home">
+    <a class="brand" href={href('/')} aria-label="Evan Zellner — home">
       <span>{identity.name}</span><span class="brand__dot" aria-hidden="true">.</span>
     </a>
 

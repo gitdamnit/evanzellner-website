@@ -6,6 +6,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import type { NavKey } from '../data/site';
+import { href } from '../lib/paths';
 
 interface Props {
   title: string;
@@ -54,8 +55,8 @@ const ogImage = new URL('/og-default.png', Astro.site ?? 'https://evanzellner.co
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={href('/sitemap.xml')} />
 
     <link rel="me" href="https://github.com/gitdamnit" />
     <link rel="me" href="https://www.linkedin.com/in/evanzellner" />

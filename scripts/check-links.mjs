@@ -8,6 +8,10 @@ import { join, extname } from 'node:path';
 
 const DIST = new URL('../dist/', import.meta.url);
 const distPath = DIST.pathname;
+const BASE = (process.env.BASE_PATH ?? '/').replace(/\/$/, '');
+
+/** Removes the GitHub Pages subpath so lookups resolve inside dist/. */
+const stripBase = (path) => (BASE && path.startsWith(BASE) ? path.slice(BASE.length) || '/' : path);
 
 const walk = async (dir) => {
   const out = [];
@@ -36,7 +40,7 @@ for (const file of htmlFiles) {
     anchors += 1;
 
     const [rawPath] = href.split('#');
-    const target = rawPath || page;
+    const target = stripBase(rawPath || page);
     const resolved = target.endsWith('/')
       ? join(distPath, target, 'index.html')
       : join(distPath, target);
@@ -49,7 +53,7 @@ for (const file of htmlFiles) {
   for (const match of html.matchAll(/(?:src|href)="(\/[^"]+\.(?:png|jpg|jpeg|svg|pdf|css|js|xml|txt))"/g)) {
     const href = match[1];
     assets += 1;
-    if (!existsSync(join(distPath, href))) {
+    if (!existsSync(join(distPath, stripBase(href)))) {
       failures.push(`${page} → asset ${href} missing`);
     }
   }
@@ -73,7 +77,10 @@ for (const file of htmlFiles) {
     const href = match[1];
     if (/^https?:/.test(href)) continue;
     const [rawPath, hash] = href.split('#');
-    const ids = rawPath ? await idsOn(rawPath) : new Set([...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]));
+    const target = stripBase(rawPath);
+    const ids = rawPath
+      ? await idsOn(target)
+      : new Set([...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]));
     if (!ids) continue; // missing page already reported by the link pass
     if (!ids.has(hash)) failures.push(`${page} → anchor #${hash} not found in ${rawPath || page}`);
   }

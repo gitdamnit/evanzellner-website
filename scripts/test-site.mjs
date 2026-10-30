@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 
-const base = 'http://localhost:4321';
+// Staging builds live under a subpath; production serves from the root.
+const base = process.env.TEST_BASE_URL ?? 'http://localhost:4321';
 const results = [];
 const fail = (msg) => results.push(`FAIL ${msg}`);
 const pass = (msg) => results.push(`ok   ${msg}`);

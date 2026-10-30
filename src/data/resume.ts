@@ -44,6 +44,8 @@ export interface VolunteerRole {
   dates: string;
 }
 
+import { href } from '../lib/paths';
+
 export const resume = {
   name: 'Evan Zellner',
   headline: 'Human Resources | Talent Acquisition | Technical Recruiting',
@@ -52,7 +54,7 @@ export const resume = {
   linkedin: 'https://www.linkedin.com/in/evanzellner',
   linkedinLabel: 'linkedin.com/in/evanzellner',
   updated: 'October 2026',
-  pdfPath: '/downloads/evan-zellner-resume-october-2026.pdf',
+  pdfPath: href('/downloads/evan-zellner-resume-october-2026.pdf'),
   summary: [
     'Human resources and talent acquisition professional with a Master of Science in Human Resource Management, active PHR and SHRM-CP credentials, and six years of full-cycle recruiting experience.',
     'Combines enterprise technical hiring and agency recruiting with hands-on employee relations, performance coaching, training, workforce operations, and HR systems implementation. Generated $2.6 million in annual recruiting revenue, personally hired and onboarded more than 500 field technicians, and led an ATS evaluation and migration. Known for profitable placements, high-touch candidate support, data-informed sourcing, and structured process improvement. Open to relocating for the right opportunity.',
