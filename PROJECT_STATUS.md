@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** 48c8578e887933bbcc54dc6b1da5d6d1948517a9
+- **Observed commit:** 4760081a85af5534965ffc008055150272359109
 - **Observed working tree:** dirty
-- **Observed at:** 2026-10-30T14:03:55Z
+- **Observed at:** 2026-10-30T14:07:29Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -89,14 +89,22 @@ Limitations worth recording, none of which are defects:
 
 ## Blockers
 
-- **Custom domain.** Owner action: add the four `A` records (and the `www` CNAME)
-  listed in `deploy/GITHUB-PAGES.md`, then set the custom domain in repository
-  settings. The `github.io` URL redirects to `evanzellner.com` only after that,
-  which is why no `CNAME` is committed yet.
+- **Custom domain.** `evanzellner.com` is already live and is **not** served by
+  this repository. As observed on 30 October 2026: `A 2.57.91.91`, `AAAA
+  2a02:4780:84::32` (Hostinger), nameservers `pearl.ns.cloudflare.com` and
+  `sullivan.ns.cloudflare.com`, and `https://evanzellner.com/` returns 200 from
+  a Framer site (`more-surface-302655.framer.app`). Pointing it here is a
+  cutover that replaces a working site, so it is the owner's call and needs
+  Cloudflare DNS access. The records to set are in `deploy/GITHUB-PAGES.md`.
+  The `github.io` URL redirects to the domain only after that, which is why no
+  `CNAME` is committed yet.
 
 ## Next Actions
 
-1. Owner adds the four `A` records and the `www` CNAME from `deploy/GITHUB-PAGES.md`.
+1. Owner decides whether to cut over from the current Framer/Hostinger site. If
+   yes: replace the apex `A`/`AAAA` records with GitHub's four `A` records, point
+   `www` at `gitdamnit.github.io`, set the records to DNS-only while GitHub issues
+   the certificate, and keep the old records for rollback.
 2. Owner sets the custom domain to `evanzellner.com` in repository settings, then
    copies `deploy/CNAME` to `public/CNAME` and pushes.
 3. Confirm the certificate and enable "Enforce HTTPS"; re-run the smoke test with
