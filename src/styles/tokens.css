@@ -40,7 +40,7 @@
   --text-hero: clamp(2.85rem, 1.4rem + 6vw, 6.25rem);
   /* Homepage greeting: sized so "a developer" fits one line inside the hero
      card at every breakpoint. */
-  --text-greeting: clamp(2.05rem, 0.95rem + 3.4vw, 4.1rem);
+  --text-greeting: clamp(2.05rem, 0.95rem + 3vw, 3.5rem);
 
   /* Space */
   --space-1: 0.25rem;

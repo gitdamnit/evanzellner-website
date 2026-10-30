@@ -66,21 +66,33 @@ const browser = await chromium.launch();
   const broken = statuses.filter((code) => code !== 200).length;
   broken === 0 ? pass(`all ${photos.length} photographs resolve`) : fail(`${broken} photographs 404`);
 
-  // The lime plate must not resize as the typed word grows and shrinks.
-  const widths = await page.evaluate(() => {
-    const typed = document.querySelector('[data-typed]');
-    const plate = document.querySelector('.hero-card__name');
-    if (!typed || !plate) return [0, 0];
-    const original = typed.textContent;
-    const before = plate.getBoundingClientRect().width;
-    typed.textContent = 'a';
-    const after = plate.getBoundingClientRect().width;
-    typed.textContent = original;
-    return [before, after];
+  // The photograph panel must never sit underneath the copy.
+  const layout = await page.evaluate(() => {
+    const content = document.querySelector('.hero-card__content').getBoundingClientRect();
+    const media = document.querySelector('.hero-card__media').getBoundingClientRect();
+    return { overlap: content.right - media.left, stacked: media.top >= content.bottom - 1 };
   });
-  Math.abs(widths[0] - widths[1]) < 1
-    ? pass('hero plate width is stable while typing')
-    : fail(`hero plate resized ${widths[0]} -> ${widths[1]}`);
+  layout.stacked || layout.overlap <= 0
+    ? pass('photograph panel never overlaps the copy')
+    : fail(`photograph panel overlaps the copy by ${Math.round(layout.overlap)}px`);
+
+  // Typing must not change the hero height.
+  const heights = await page.evaluate(() => {
+    const typed = document.querySelector('[data-typed]');
+    const card = document.querySelector('.hero-card');
+    if (!typed || !card) return [0, 0, 0];
+    const original = typed.textContent;
+    const full = card.getBoundingClientRect().height;
+    typed.textContent = '';
+    const empty = card.getBoundingClientRect().height;
+    typed.textContent = 'a gardener';
+    const long = card.getBoundingClientRect().height;
+    typed.textContent = original;
+    return [full, empty, long];
+  });
+  Math.max(...heights) - Math.min(...heights) < 1
+    ? pass('hero height is stable while typing')
+    : fail(`hero height changed ${heights.join(' -> ')}`);
 
   await page.close();
 }
@@ -170,6 +182,20 @@ const browser = await chromium.launch();
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     overflow <= 1 ? pass(`${path} no horizontal overflow at 390px`) : fail(`${path} overflows ${overflow}px`);
+
+    if (path === '/') {
+      const heroOverlap = await page.evaluate(() => {
+        const content = document.querySelector('.hero-card__content');
+        const media = document.querySelector('.hero-card__media');
+        if (!content || !media) return 0;
+        const copy = content.getBoundingClientRect();
+        const photo = media.getBoundingClientRect();
+        return photo.top >= copy.bottom - 1 ? 0 : copy.right - photo.left;
+      });
+      heroOverlap <= 0
+        ? pass('hero photographs stack below the copy at 390px')
+        : fail(`hero photographs overlap the copy at 390px by ${Math.round(heroOverlap)}px`);
+    }
   }
   await page.close();
 }
