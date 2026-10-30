@@ -24,11 +24,10 @@ export type NavKey = (typeof navItems)[number]['key'];
 /** Homepage copy, fixed by the approved design. */
 export const home = {
   hero: {
-    greeting: "Hi. I'm",
+    greeting: 'Hi!',
     roles: ['a developer', 'a recruiter', 'a builder', 'a writer', 'a gardener'],
-    caption: 'A little about me.',
     href: href('/about/'),
-    ariaLabel: 'A little about me — go to the About page',
+    ariaLabel: 'More about Evan — go to the About page',
   },
   about: {
     index: '01',

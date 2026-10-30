@@ -43,15 +43,11 @@ const jsonLd = {
             <span class="hero-card__greeting">{home.hero.greeting}</span>
             <span class="hero-card__roles" data-roles>
               <span class="hero-card__role"
-                ><span data-typed>{home.hero.roles[0]}</span><span class="hero-card__caret" aria-hidden="true"
+                ><span data-typed>I'm {home.hero.roles[0]}</span><span class="hero-card__caret" aria-hidden="true"
                 ></span></span
               >
             </span>
           </h1>
-
-          <div class="hero-card__foot">
-            <p class="hero-card__caption">{home.hero.caption}</p>
-          </div>
         </div>
 
         <div class="hero-card__media" aria-hidden="true">
@@ -183,8 +179,15 @@ const jsonLd = {
     </div>
   </div>
 
-  <script>
-    type Photo = { src: string; width: number; height: number };
+<script>
+    type Character = {
+      id: string;
+      character: string;
+      source: string;
+      status: 'approved' | 'rejected' | 'pending';
+      captions: string[];
+    };
+    type Photo = { src: string; width: number; height: number; character: Character | null };
 
     const dataNode = document.getElementById('moviestar-data');
     const card = document.querySelector<HTMLElement>('[data-moviestar]');
@@ -198,10 +201,15 @@ const jsonLd = {
       const layers = card.querySelectorAll<HTMLImageElement>('[data-photo]');
       const typed = card.querySelector<HTMLElement>('[data-typed]');
       const caret = card.querySelector<HTMLElement>('.hero-card__caret');
+      const rolesHost = card.querySelector<HTMLElement>('[data-roles]');
 
-      const ROTATE_MS = 15000;
-      const HOLD_MS = 2000;
-      const TYPE_MS = 70;
+      /* One photograph every six seconds. Its line types in one second after it
+         appears; halfway through the window a line about the person himself is
+         added. Both are pushed onto the stack, newest first. */
+      const PHOTO_MS = 6000;
+      const CAPTION_DELAY = 1000;
+      const PERSONAL_DELAY = 3000;
+      const TYPE_MS = 42;
       const MAX_LINES = 8;
 
       const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -209,9 +217,6 @@ const jsonLd = {
       let current = 0;
       let front = 0;
 
-      /* Crossfades the two stacked <img> layers. Both start on the same photo,
-         so the second one is already cached and the swap is invisible until the
-         new file loads. */
       const paint = (index: number) => {
         const photo = photos[index];
         if (!photo) return;
@@ -233,8 +238,73 @@ const jsonLd = {
         else next.addEventListener('load', reveal, { once: true });
       };
 
-      if (photos.length > 1) {
-        // Start on a random picture so two visits do not open the same way.
+      /* Picks an approved caption for the character, never repeating the one
+         used the last time the same character appeared. Returns null when the
+         character has no approved caption, so the caller can fall back. */
+      const lastCaption = new Map<string, number>();
+      const captionFor = (photo: Photo): string | null => {
+        const character = photo.character;
+        if (!character || character.status !== 'approved') return null;
+        if (character.captions.length === 0) return null;
+
+        const previous = lastCaption.get(character.id);
+        let index = Math.floor(Math.random() * character.captions.length);
+        if (character.captions.length > 1 && index === previous) {
+          index = (index + 1) % character.captions.length;
+        }
+        lastCaption.set(character.id, index);
+        return character.captions[index] ?? null;
+      };
+
+      /* The lines about the actual person, so the hero never stops being about
+         him even when the photograph is a rejected character. */
+      let personalIndex = 0;
+      const nextPersonal = (): string => {
+        const role = roles[personalIndex % roles.length] ?? 'a developer';
+        personalIndex += 1;
+        return `I'm ${role}`;
+      };
+
+      const addLine = (): HTMLElement => {
+        const host = rolesHost;
+        if (!host) throw new Error('hero role stack missing');
+
+        const line = document.createElement('span');
+        line.className = 'hero-card__role';
+
+        const body = document.createElement('span');
+        body.dataset.typed = '';
+
+        const nextCaret = document.createElement('span');
+        nextCaret.className = 'hero-card__caret';
+        nextCaret.setAttribute('aria-hidden', 'true');
+
+        line.append(body, nextCaret);
+        host.prepend(line);
+
+        while (host.children.length > MAX_LINES) {
+          host.lastElementChild?.remove();
+        }
+
+        return body;
+      };
+
+      const typeInto = async (element: HTMLElement, text: string) => {
+        for (let i = 1; i <= text.length; i += 1) {
+          element.textContent = text.slice(0, i);
+          await sleep(TYPE_MS);
+        }
+      };
+
+      /* Typing is deliberately not awaited: a long caption would otherwise push
+         the next photograph late. Each line owns its own element. */
+      const pushLine = (text: string) => {
+        if (!text) return;
+        void typeInto(addLine(), text);
+      };
+
+      if (photos.length > 0) {
+        // Open on a random picture so two visits do not start the same way.
         current = Math.floor(Math.random() * photos.length);
         const first = layers[0];
         const photo = photos[current];
@@ -244,67 +314,53 @@ const jsonLd = {
           first.src = photo.src;
         }
 
-        setInterval(() => {
-          if (document.hidden || photos.length < 2) return;
-          let next = current;
-          while (next === current) next = Math.floor(Math.random() * photos.length);
-          current = next;
-          paint(next);
-        }, ROTATE_MS);
-      }
+        // The first line describes the picture already on screen.
+        if (typed && photo) {
+          const opening = captionFor(photo);
+          typed.textContent = opening ?? nextPersonal();
+        }
 
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const rolesHost = card.querySelector<HTMLElement>('[data-roles]');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      if (prefersReducedMotion) {
-        // The first phrase is already in the HTML; just stop the caret blinking.
-        caret?.remove();
-      } else if (typed && rolesHost && roles.length > 1) {
-        card.classList.add('is-live');
+        if (prefersReducedMotion) {
+          caret?.remove();
+        } else if (rolesHost) {
+          card.classList.add('is-live');
 
-        const typeInto = async (element: HTMLElement, text: string) => {
-          for (let i = 1; i <= text.length; i += 1) {
-            element.textContent = text.slice(0, i);
-            await sleep(TYPE_MS);
-          }
-        };
+          let busy = false;
 
-        /* Adds an empty line at the top of the stack, which pushes every older
-           line down, and returns the element to type into. */
-        const addLine = (): HTMLElement => {
-          const line = document.createElement('span');
-          line.className = 'hero-card__role';
+          const tick = async () => {
+            if (busy || document.hidden || photos.length < 2) return;
+            busy = true;
 
-          const text = document.createElement('span');
-          text.dataset.typed = '';
+            let next = current;
+            while (next === current) next = Math.floor(Math.random() * photos.length);
+            current = next;
+            paint(next);
 
-          const nextCaret = document.createElement('span');
-          nextCaret.className = 'hero-card__caret';
-          nextCaret.setAttribute('aria-hidden', 'true');
+            const shown = photos[next];
 
-          line.append(text, nextCaret);
-          rolesHost.prepend(line);
+            await sleep(CAPTION_DELAY);
+            if (document.hidden) {
+              busy = false;
+              return;
+            }
+            pushLine(captionFor(shown) ?? nextPersonal());
 
-          while (rolesHost.children.length > MAX_LINES) {
-            rolesHost.lastElementChild?.remove();
-          }
+            await sleep(Math.max(0, PERSONAL_DELAY - CAPTION_DELAY));
+            if (document.hidden) {
+              busy = false;
+              return;
+            }
+            pushLine(nextPersonal());
 
-          return text;
-        };
+            busy = false;
+          };
 
-        const cycle = async () => {
-          let index = 0;
-          await sleep(HOLD_MS);
-          for (;;) {
-            index = (index + 1) % roles.length;
-            const target = addLine();
-            await sleep(40);
-            await typeInto(target, roles[index] ?? '');
-            await sleep(HOLD_MS);
-          }
-        };
-
-        void cycle();
+          setInterval(() => {
+            void tick();
+          }, PHOTO_MS);
+        }
       }
     }
   </script>
@@ -413,7 +469,7 @@ const jsonLd = {
   /* The stack of phrases. Newest is first; older lines are pushed down and
      clipped here, so the card never grows no matter how many are added. */
   .hero-card__roles {
-    --role-lines: 4;
+    --role-lines: 6;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -462,18 +518,6 @@ const jsonLd = {
     to {
       visibility: hidden;
     }
-  }
-
-  .hero-card__foot {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-4);
-  }
-
-  .hero-card__caption {
-    font-size: var(--text-md);
-    letter-spacing: -0.01em;
   }
 
 
@@ -621,7 +665,7 @@ const jsonLd = {
     }
 
     .hero-card__roles {
-      --role-lines: 3;
+      --role-lines: 4;
       flex: none;
       /* Reserved from the start, so the card is the same height before and
          after lines are added. */

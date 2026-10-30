@@ -43,12 +43,12 @@ const browser = await chromium.launch();
   await page.goto(base + '/', { waitUntil: 'networkidle' });
 
   const greeting = (await page.locator('.hero-card__greeting').textContent())?.trim();
-  greeting === "Hi. I'm" ? pass('hero greeting present') : fail(`hero greeting was "${greeting}"`);
+  greeting === 'Hi!' ? pass('hero greeting is "Hi!"') : fail(`hero greeting was "${greeting}"`);
 
   const role = (await page.locator('[data-typed]').textContent())?.trim() ?? '';
   role.length > 0
-    ? pass(`hero role is in the HTML: "${role}"`)
-    : fail('hero role is empty before JavaScript runs');
+    ? pass(`hero line is in the HTML: "${role}"`)
+    : fail('hero line is empty before JavaScript runs');
 
   const payload = await page.evaluate(() =>
     JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}'),
@@ -65,6 +65,53 @@ const browser = await chromium.launch();
   );
   const broken = statuses.filter((code) => code !== 200).length;
   broken === 0 ? pass(`all ${photos.length} photographs resolve`) : fail(`${broken} photographs 404`);
+
+  // Only approved captions may publish, and the line must match the picture.
+  const pairing = await page.evaluate(() => {
+    const data = JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}');
+    const pics = data.photos ?? [];
+    const img = document.querySelector('.hero-card__photo.is-active');
+    const shown = pics.find((p) => p.src === img?.getAttribute('src')) ?? null;
+    const line = document.querySelector('[data-typed]')?.textContent?.trim() ?? '';
+    const rejected = pics.filter((p) => p.character && p.character.status !== 'approved' && p.character.captions.length);
+    return { shown, line, rejectedCount: rejected.length };
+  });
+
+  const char = pairing.shown?.character ?? null;
+  const approvedForChar = char && char.status === 'approved' ? char.captions : [];
+  const matchesCaption = approvedForChar.includes(pairing.line);
+  const matchesPersonal = /^I'm /.test(pairing.line);
+  matchesCaption || matchesPersonal
+    ? pass(`hero line matches the photograph: "${pairing.line}"`)
+    : fail(`hero line "${pairing.line}" does not belong to ${char ? char.character : 'a known character'}`);
+
+  // Deterministic: the rejected/pending records are retained on purpose.
+  pairing.rejectedCount >= 1
+    ? pass(`${pairing.rejectedCount} unapproved characters retained for review, none published`)
+    : fail('no unapproved character records found — the review trail is missing');
+
+  // Unapproved captions are kept in the data as a review trail, so the check is
+  // that they never reach the page rather than that they do not exist.
+  const unapproved = await page.evaluate(() => {
+    const data = JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}');
+    return (data.photos ?? [])
+      .filter((photo) => photo.character && photo.character.status !== 'approved')
+      .flatMap((photo) => photo.character.captions ?? [])
+      .filter(Boolean);
+  });
+
+  const leaked = [];
+  for (let i = 0; i < 14; i += 1) {
+    const lines = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-typed]')].map((el) => el.textContent ?? ''),
+    );
+    leaked.push(...lines.filter((line) => unapproved.some((caption) => line.includes(caption))));
+    await page.waitForTimeout(500);
+  }
+
+  leaked.length === 0
+    ? pass(`${unapproved.length} unapproved captions stay unpublished across a rotation`)
+    : fail(`unapproved caption shown: ${leaked[0]}`);
 
   // The photograph panel must never sit underneath the copy.
   const layout = await page.evaluate(() => {
@@ -168,9 +215,9 @@ const browser = await chromium.launch();
   await reduced.goto(base + '/', { waitUntil: 'networkidle' });
   await reduced.waitForTimeout(2600);
   const reducedRole = (await reduced.locator('[data-typed]').textContent())?.trim();
-  reducedRole === 'a developer'
-    ? pass('reduced motion keeps the first role static')
-    : fail(`reduced motion changed the role to "${reducedRole}"`);
+  Boolean(reducedRole)
+    ? pass(`reduced motion keeps one static line: "${reducedRole}"`)
+    : fail('reduced motion left the hero line empty');
   const carets = await reduced.locator('.hero-card__caret').count();
   carets === 0 ? pass('reduced motion removes the caret') : fail('caret still present under reduced motion');
   await reducedContext.close();
@@ -179,9 +226,9 @@ const browser = await chromium.launch();
   const noJs = await noJsContext.newPage();
   await noJs.goto(base + '/', { waitUntil: 'domcontentloaded' });
   const noJsRole = (await noJs.locator('[data-typed]').textContent())?.trim();
-  noJsRole === 'a developer'
-    ? pass('role renders with JavaScript disabled')
-    : fail(`role without JavaScript was "${noJsRole}"`);
+  noJsRole === "I'm a developer"
+    ? pass('line renders with JavaScript disabled')
+    : fail(`line without JavaScript was "${noJsRole}"`);
   const photoLoaded = await noJs
     .locator('[data-photo][data-photo="0"]')
     .evaluate((img) => img.complete && img.naturalWidth > 0);
