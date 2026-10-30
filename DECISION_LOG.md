@@ -201,3 +201,14 @@ Allowed statuses: `Proposed`, `Accepted`, `Superseded`, `Deprecated`, `Rejected`
 - **Rationale:** This page is the one place on the site that is purely the owner's voice. Editing it for evidence or polish would defeat the purpose, and the earlier version's tone contradicted the homepage.
 - **Consequences:** The page no longer cites the résumé, so statements about his work history now live only on the Résumé page. Removing the doors block drops three internal links; `check:links` still passes with 72 links. The published text contains profanity, which a recruiter-facing audience will see; this is intentional and owned.
 - **Supersedes:** None
+
+### D-0017 — Remove the moviestar photographs and restore the plain lime hero
+
+- **Date:** 2026-10-30
+- **Status:** Accepted
+- **Context:** The photographs, the rotating lines, the stacked phrases and the character captions (D-0011 to D-0015) were built over several iterations and the owner judged the result a regression rather than an improvement. The request was to delete every photograph of him as a film character and return the homepage hero to the original lime box.
+- **Alternatives Considered:** Keep the photographs and disable them behind a flag (rejected: dead complexity on a static site); keep selected characters (rejected: the request was to delete all of them); restore the original hero exactly, including the asterisk and the "A little about me." line (rejected: both had already been rejected by the owner after the original design was approved).
+- **Decision:** `src/assets/moviestar/` (63 PNG, 12 MB) and `src/data/moviestar.ts` are deleted. `src/pages/index.astro`, `src/data/site.ts`, `src/styles/tokens.css`, `src/pages/404.astro` and `scripts/test-site.mjs` are restored from commit `412e876`, the last state before the photographs were introduced. The hero is the lime card with "Evan Zellner." and nothing else: no photographs, no asterisk, no caption line, no scripting. The functional suite returns to its 15 assertions.
+- **Rationale:** Reverting the files to a known-good commit is more reliable than unpicking five layered changes by hand, and it guarantees the deployed markup matches what was verified before the photographs existed.
+- **Consequences:** The originals remain on disk at `~/Desktop/evan-moviestar/` and in Git history (`d5affc4` onward), so nothing is destroyed. The character/caption table and the review trail live on in D-0015 and that history but no longer ship. Dropping the asterisk and caption leaves the hero with a single line of type; both are a one-line change if they are ever wanted back.
+- **Supersedes:** D-0011, D-0012, D-0013, D-0014, D-0015

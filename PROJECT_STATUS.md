@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** 584ebd06092c36b72395735d044085e1dae86925
+- **Observed commit:** 18e8084e59759b99d4fa701e099308451ecdade9
 - **Observed working tree:** dirty
-- **Observed at:** 2026-10-30T18:27:14Z
+- **Observed at:** 2026-10-30T19:50:36Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -48,15 +48,8 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Implemented] `BASE_PATH` removed from the Pages workflow and `deploy/CNAME` copied to `public/CNAME`, so builds serve from `/` — `.github/workflows/pages.yml`, `public/CNAME`
 - [Deployed] GitHub Pages custom domain set to `evanzellner.com` with a certificate covering apex and `www`; "Enforce HTTPS" enabled — repository Pages settings, 30 Oct 2026
 - [Tested] `https://evanzellner.com/` returns 200 from GitHub, serves the correct `<title>`, redirects `http`→`https` and `www`→apex, and passes all assertions — `TEST_BASE_URL=https://evanzellner.com npm run test:site`, 30 Oct 2026
-- [Implemented] Homepage hero cycles 63 photographs of the owner as film characters every 15 s and types/erases five roles after "Hi. I'm" — `src/data/moviestar.ts`, `src/pages/index.astro` (D-0011, FR-11)
-- [Implemented] Hero is a two-column card: copy on the left, photographs in their own right-hand panel, so a picture is never cut by the text; contrast is 15.32:1 by construction — `src/pages/index.astro` (D-0012)
-- [Implemented] Photographs are shown whole with `object-fit: contain`, no zoom at rest or on hover, WebP at quality 88 and intrinsic width (D-0013)
-- [Implemented] Hero phrases stack under the greeting, newest on top with older lines pushed down, capped at four lines on desktop and three on mobile so the card height never changes; photo inset on the right by the card padding (D-0014) — `src/pages/index.astro`
+- [Implemented] Homepage hero is the plain lime card again: "Evan Zellner." and nothing else; all 63 moviestar photographs and their caption data are deleted (D-0017) — `src/pages/index.astro`
 - [Implemented] About page replaced with the owner's first-person copy, verbatim, in four sections; the "Three other doors" block is removed (D-0016) — `src/data/about.ts`, `src/pages/about/index.astro`
-- [Implemented] Greeting uses the Newsreader serif at 64 px and is static; the asterisk and the "A little about me." line are removed from the hero (D-0014, D-0015) — `src/pages/index.astro`, `src/styles/tokens.css`
-- [Implemented] 44 characters mapped to their photographs with approved / rejected / pending status; only approved captions publish, and each photograph cycles every 6 s with its caption at +1 s and a personal line at +3 s (D-0015) — `src/data/moviestar.ts`, `src/pages/index.astro`
-- [Tested] Hero: greeting in HTML, role in HTML before JavaScript, 63 photographs all resolve, panel never overlaps the copy at 1280 px or 390 px, photograph shown whole with no crop and ≤105% scale, height stable while typing — `scripts/test-site.mjs`
-- [Tested] Hero fallbacks: reduced motion keeps the first role static and removes the caret; JavaScript off renders the role, loads the first photograph, and hides the caret — `scripts/test-site.mjs`
 
 ## Tests
 
@@ -65,13 +58,13 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 | Type, template, and integrity check | `npx astro check` | Pass (23 files, 0 errors, 0 warnings, 0 hints) | local run, 30 Oct 2026 |
 | Production build | `npm run build` | Pass (6 pages) | `dist/` |
 | Internal links, assets, anchors | `npm run check:links` | Pass (75 links, 22 assets, 0 failures) | local run, 30 Oct 2026 |
-| Functional suite | `npm run test:site` | Pass (31 assertions) | `scripts/test-site.mjs`, 30 Oct 2026 |
+| Functional suite | `npm run test:site` | Pass (15 assertions) | `scripts/test-site.mjs`, 30 Oct 2026 |
 | External repository and release links | manual `curl` sweep | Pass (15 URLs, all 200) | local run, 30 Oct 2026 |
 | Contrast | computed WCAG ratios for every text/surface pair | Pass (lowest 4.76:1, body text 14.79:1) | local calculation, 30 Oct 2026 |
 | Visual sweep | Playwright captures at 1440 px and 390 px | Pass (7 captures, no overflow, no console errors) | local run, 30 Oct 2026 |
 | GitHub Actions build | `pages.yml` on push | Pass (run 41068177574, build + deploy jobs) | https://github.com/gitdamnit/evanzellner-website/actions/runs/41068177574 |
 | Pages deployment smoke test | `TEST_BASE_URL=https://gitdamnit.github.io/evanzellner-website npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
-| Custom domain functional suite | `TEST_BASE_URL=https://evanzellner.com npm run test:site` | Pass (15 assertions, before the hero change) | local run, 30 Oct 2026 |
+| Custom domain functional suite | `TEST_BASE_URL=https://evanzellner.com npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
 | Custom domain resolution | `dig evanzellner.com` at 1.1.1.1, 8.8.8.8, and authoritative | Pass (4×`185.199.*` A, 4×`2606:50c0:*` AAAA) | local run, 30 Oct 2026 |
 | Custom domain certificate | `openssl s_client` + Pages certificate state | Pass (`approved`, apex and `www`, expires 15 Jan 2027) | local run, 30 Oct 2026 |
 | HTTPS enforcement | `curl -I http://evanzellner.com/` | Pass (301 → `https://evanzellner.com/`) | local run, 30 Oct 2026 |

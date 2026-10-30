@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { home } from '../data/site';
 import { href } from '../lib/paths';
 ---
 
@@ -17,7 +18,7 @@ import { href } from '../lib/paths';
       <p class="lost__body">
         The address you followed does not exist here. The doors that do are below.
       </p>
-      <a class="button" href={href('/')}>Back home</a>
+      <a class="button" href={href('/')}>{home.hero.caption} — back home</a>
       <ul class="lost__links">
         <li><a class="rule-link" href={href('/projects/')}>Projects</a></li>
         <li><a class="rule-link" href={href('/resume/')}>Résumé</a></li>

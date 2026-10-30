@@ -37,132 +37,7 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// 4. Homepage hero: rotating photographs and the typed greeting
-{
-  const page = await browser.newPage();
-  await page.goto(base + '/', { waitUntil: 'networkidle' });
-
-  const greeting = (await page.locator('.hero-card__greeting').textContent())?.trim();
-  greeting === 'Hi!' ? pass('hero greeting is "Hi!"') : fail(`hero greeting was "${greeting}"`);
-
-  const role = (await page.locator('[data-typed]').textContent())?.trim() ?? '';
-  role.length > 0
-    ? pass(`hero line is in the HTML: "${role}"`)
-    : fail('hero line is empty before JavaScript runs');
-
-  const payload = await page.evaluate(() =>
-    JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}'),
-  );
-  const photos = payload.photos ?? [];
-  const roles = payload.roles ?? [];
-  photos.length >= 10
-    ? pass(`${photos.length} rotating photographs, ${roles.length} roles`)
-    : fail(`only ${photos.length} photographs configured`);
-
-  // Every optimised photograph must exist in the build.
-  const statuses = await Promise.all(
-    photos.map(async (photo) => (await page.request.head(base + photo.src)).status()),
-  );
-  const broken = statuses.filter((code) => code !== 200).length;
-  broken === 0 ? pass(`all ${photos.length} photographs resolve`) : fail(`${broken} photographs 404`);
-
-  // Only approved captions may publish, and the line must match the picture.
-  const pairing = await page.evaluate(() => {
-    const data = JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}');
-    const pics = data.photos ?? [];
-    const img = document.querySelector('.hero-card__photo.is-active');
-    const shown = pics.find((p) => p.src === img?.getAttribute('src')) ?? null;
-    const line = document.querySelector('[data-typed]')?.textContent?.trim() ?? '';
-    const rejected = pics.filter((p) => p.character && p.character.status !== 'approved' && p.character.captions.length);
-    return { shown, line, rejectedCount: rejected.length };
-  });
-
-  const char = pairing.shown?.character ?? null;
-  const approvedForChar = char && char.status === 'approved' ? char.captions : [];
-  const matchesCaption = approvedForChar.includes(pairing.line);
-  const matchesPersonal = /^I'm /.test(pairing.line);
-  matchesCaption || matchesPersonal
-    ? pass(`hero line matches the photograph: "${pairing.line}"`)
-    : fail(`hero line "${pairing.line}" does not belong to ${char ? char.character : 'a known character'}`);
-
-  // Deterministic: the rejected/pending records are retained on purpose.
-  pairing.rejectedCount >= 1
-    ? pass(`${pairing.rejectedCount} unapproved characters retained for review, none published`)
-    : fail('no unapproved character records found — the review trail is missing');
-
-  // Unapproved captions are kept in the data as a review trail, so the check is
-  // that they never reach the page rather than that they do not exist.
-  const unapproved = await page.evaluate(() => {
-    const data = JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}');
-    return (data.photos ?? [])
-      .filter((photo) => photo.character && photo.character.status !== 'approved')
-      .flatMap((photo) => photo.character.captions ?? [])
-      .filter(Boolean);
-  });
-
-  const leaked = [];
-  for (let i = 0; i < 14; i += 1) {
-    const lines = await page.evaluate(() =>
-      [...document.querySelectorAll('[data-typed]')].map((el) => el.textContent ?? ''),
-    );
-    leaked.push(...lines.filter((line) => unapproved.some((caption) => line.includes(caption))));
-    await page.waitForTimeout(500);
-  }
-
-  leaked.length === 0
-    ? pass(`${unapproved.length} unapproved captions stay unpublished across a rotation`)
-    : fail(`unapproved caption shown: ${leaked[0]}`);
-
-  // The photograph panel must never sit underneath the copy.
-  const layout = await page.evaluate(() => {
-    const content = document.querySelector('.hero-card__content').getBoundingClientRect();
-    const media = document.querySelector('.hero-card__media').getBoundingClientRect();
-    return { overlap: content.right - media.left, stacked: media.top >= content.bottom - 1 };
-  });
-  layout.stacked || layout.overlap <= 0
-    ? pass('photograph panel never overlaps the copy')
-    : fail(`photograph panel overlaps the copy by ${Math.round(layout.overlap)}px`);
-
-  // The photograph must be shown whole and must not be magnified. The source
-  // files are ~330 px wide, so any real upscale is visible mush.
-  const sizing = await page.evaluate(() => {
-    const img = document.querySelector('.hero-card__photo.is-active');
-    if (!img) return null;
-    const box = img.getBoundingClientRect();
-    const scale = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
-    return {
-      fits: img.naturalWidth * scale <= box.width + 1 && img.naturalHeight * scale <= box.height + 1,
-      upscale: scale,
-      source: `${img.naturalWidth}x${img.naturalHeight}`,
-      drawn: `${Math.round(img.naturalWidth * scale)}x${Math.round(img.naturalHeight * scale)}`,
-    };
-  });
-  sizing && sizing.fits && sizing.upscale <= 1.05
-    ? pass(`photograph shown whole, no crop, ${(sizing.upscale * 100).toFixed(0)}% of ${sizing.source}`)
-    : fail(`photograph cropped or upscaled: ${JSON.stringify(sizing)}`);
-
-  // Typing must not change the hero height.
-  const heights = await page.evaluate(() => {
-    const typed = document.querySelector('[data-typed]');
-    const card = document.querySelector('.hero-card');
-    if (!typed || !card) return [0, 0, 0];
-    const original = typed.textContent;
-    const full = card.getBoundingClientRect().height;
-    typed.textContent = '';
-    const empty = card.getBoundingClientRect().height;
-    typed.textContent = 'a gardener';
-    const long = card.getBoundingClientRect().height;
-    typed.textContent = original;
-    return [full, empty, long];
-  });
-  Math.max(...heights) - Math.min(...heights) < 1
-    ? pass('hero height is stable while typing')
-    : fail(`hero height changed ${heights.join(' -> ')}`);
-
-  await page.close();
-}
-
-// 5. Résumé PDF download
+// 4. Résumé PDF download
 {
   const page = await browser.newPage();
   await page.goto(base + '/resume/', { waitUntil: 'networkidle' });
@@ -174,7 +49,7 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// 6. Contact form: validation and mailto draft, no network submission
+// 5. Contact form: validation and mailto draft, no network submission
 {
   const page = await browser.newPage();
   const requests = [];
@@ -208,37 +83,7 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// 7. Hero fallbacks: reduced motion and no JavaScript
-{
-  const reducedContext = await browser.newContext({ reducedMotion: 'reduce' });
-  const reduced = await reducedContext.newPage();
-  await reduced.goto(base + '/', { waitUntil: 'networkidle' });
-  await reduced.waitForTimeout(2600);
-  const reducedRole = (await reduced.locator('[data-typed]').textContent())?.trim();
-  Boolean(reducedRole)
-    ? pass(`reduced motion keeps one static line: "${reducedRole}"`)
-    : fail('reduced motion left the hero line empty');
-  const carets = await reduced.locator('.hero-card__caret').count();
-  carets === 0 ? pass('reduced motion removes the caret') : fail('caret still present under reduced motion');
-  await reducedContext.close();
-
-  const noJsContext = await browser.newContext({ javaScriptEnabled: false });
-  const noJs = await noJsContext.newPage();
-  await noJs.goto(base + '/', { waitUntil: 'domcontentloaded' });
-  const noJsRole = (await noJs.locator('[data-typed]').textContent())?.trim();
-  noJsRole === "I'm a developer"
-    ? pass('line renders with JavaScript disabled')
-    : fail(`line without JavaScript was "${noJsRole}"`);
-  const photoLoaded = await noJs
-    .locator('[data-photo][data-photo="0"]')
-    .evaluate((img) => img.complete && img.naturalWidth > 0);
-  photoLoaded ? pass('first photograph loads with JavaScript disabled') : fail('no photograph without JavaScript');
-  const noJsCaret = await noJs.locator('.hero-card__caret').isVisible();
-  noJsCaret ? fail('caret is visible with JavaScript disabled') : pass('caret hidden with JavaScript disabled');
-  await noJsContext.close();
-}
-
-// 8. Mobile overflow on every page
+// 6. Mobile overflow on every page
 {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   for (const path of ['/', '/projects/', '/resume/', '/about/', '/contact/']) {
@@ -247,20 +92,6 @@ const browser = await chromium.launch();
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     overflow <= 1 ? pass(`${path} no horizontal overflow at 390px`) : fail(`${path} overflows ${overflow}px`);
-
-    if (path === '/') {
-      const heroOverlap = await page.evaluate(() => {
-        const content = document.querySelector('.hero-card__content');
-        const media = document.querySelector('.hero-card__media');
-        if (!content || !media) return 0;
-        const copy = content.getBoundingClientRect();
-        const photo = media.getBoundingClientRect();
-        return photo.top >= copy.bottom - 1 ? 0 : copy.right - photo.left;
-      });
-      heroOverlap <= 0
-        ? pass('hero photographs stack below the copy at 390px')
-        : fail(`hero photographs overlap the copy at 390px by ${Math.round(heroOverlap)}px`);
-    }
   }
   await page.close();
 }
