@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** a7ae8ac146e09543882e8435677068db3eab3704
+- **Observed commit:** 17a920b788cf3f234efb08c62c9f659e7cdc48bf
 - **Observed working tree:** dirty
-- **Observed at:** 2026-10-30T16:41:02Z
+- **Observed at:** 2026-10-30T17:03:15Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -51,6 +51,8 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Implemented] Homepage hero cycles 63 photographs of the owner as film characters every 15 s and types/erases five roles after "Hi. I'm" — `src/data/moviestar.ts`, `src/pages/index.astro` (D-0011, FR-11)
 - [Implemented] Hero is a two-column card: copy on the left, photographs in their own right-hand panel, so a picture is never cut by the text; contrast is 15.32:1 by construction — `src/pages/index.astro` (D-0012)
 - [Implemented] Photographs are shown whole with `object-fit: contain`, no zoom at rest or on hover, WebP at quality 88 and intrinsic width (D-0013)
+- [Implemented] Hero phrases stack under the greeting, newest on top with older lines pushed down, capped at four lines on desktop and three on mobile so the card height never changes; photo inset on the right by the card padding (D-0014) — `src/pages/index.astro`
+- [Implemented] Greeting uses the Newsreader serif at 64 px; the asterisk is removed from the hero (D-0014) — `src/pages/index.astro`, `src/styles/tokens.css`
 - [Tested] Hero: greeting in HTML, role in HTML before JavaScript, 63 photographs all resolve, panel never overlaps the copy at 1280 px or 390 px, photograph shown whole with no crop and ≤105% scale, height stable while typing — `scripts/test-site.mjs`
 - [Tested] Hero fallbacks: reduced motion keeps the first role static and removes the caret; JavaScript off renders the role, loads the first photograph, and hides the caret — `scripts/test-site.mjs`
 

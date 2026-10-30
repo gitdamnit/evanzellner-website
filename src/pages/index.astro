@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Card from '../components/Card.astro';
-import StarMark from '../components/StarMark.astro';
 import ArrowUpRight from '../components/ArrowUpRight.astro';
 import { featuredProjects, home, identity } from '../data/site';
 import { loadPhotos } from '../data/moviestar';
@@ -42,15 +41,16 @@ const jsonLd = {
         <div class="hero-card__content">
           <h1 class="hero-card__name">
             <span class="hero-card__greeting">{home.hero.greeting}</span>
-            <span class="hero-card__role"
-              ><span data-typed>{home.hero.roles[0]}</span><span class="hero-card__caret" aria-hidden="true"
-              ></span></span
-            >
+            <span class="hero-card__roles" data-roles>
+              <span class="hero-card__role"
+                ><span data-typed>{home.hero.roles[0]}</span><span class="hero-card__caret" aria-hidden="true"
+                ></span></span
+              >
+            </span>
           </h1>
 
           <div class="hero-card__foot">
             <p class="hero-card__caption">{home.hero.caption}</p>
-            <StarMark size={44} class="hero-card__mark" />
           </div>
         </div>
 
@@ -202,8 +202,7 @@ const jsonLd = {
       const ROTATE_MS = 15000;
       const HOLD_MS = 2000;
       const TYPE_MS = 70;
-      const ERASE_MS = 34;
-      const PAUSE_MS = 320;
+      const MAX_LINES = 8;
 
       const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -255,37 +254,52 @@ const jsonLd = {
       }
 
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const rolesHost = card.querySelector<HTMLElement>('[data-roles]');
 
       if (prefersReducedMotion) {
-        // The full phrase is already in the HTML; just stop the caret blinking.
+        // The first phrase is already in the HTML; just stop the caret blinking.
         caret?.remove();
-      } else if (typed && roles.length > 1) {
+      } else if (typed && rolesHost && roles.length > 1) {
         card.classList.add('is-live');
 
-        const erase = async () => {
-          let text = typed.textContent ?? '';
-          while (text.length > 0) {
-            text = text.slice(0, -1);
-            typed.textContent = text;
-            await sleep(ERASE_MS);
+        const typeInto = async (element: HTMLElement, text: string) => {
+          for (let i = 1; i <= text.length; i += 1) {
+            element.textContent = text.slice(0, i);
+            await sleep(TYPE_MS);
           }
         };
 
-        const type = async (text: string) => {
-          for (let i = 1; i <= text.length; i += 1) {
-            typed.textContent = text.slice(0, i);
-            await sleep(TYPE_MS);
+        /* Adds an empty line at the top of the stack, which pushes every older
+           line down, and returns the element to type into. */
+        const addLine = (): HTMLElement => {
+          const line = document.createElement('span');
+          line.className = 'hero-card__role';
+
+          const text = document.createElement('span');
+          text.dataset.typed = '';
+
+          const nextCaret = document.createElement('span');
+          nextCaret.className = 'hero-card__caret';
+          nextCaret.setAttribute('aria-hidden', 'true');
+
+          line.append(text, nextCaret);
+          rolesHost.prepend(line);
+
+          while (rolesHost.children.length > MAX_LINES) {
+            rolesHost.lastElementChild?.remove();
           }
+
+          return text;
         };
 
         const cycle = async () => {
           let index = 0;
           await sleep(HOLD_MS);
           for (;;) {
-            await erase();
             index = (index + 1) % roles.length;
-            await sleep(PAUSE_MS);
-            await type(roles[index] ?? '');
+            const target = addLine();
+            await sleep(40);
+            await typeInto(target, roles[index] ?? '');
             await sleep(HOLD_MS);
           }
         };
@@ -319,7 +333,8 @@ const jsonLd = {
     background: var(--color-accent);
     color: var(--color-accent-ink);
     border-radius: var(--radius-card);
-    padding: clamp(1.5rem, 2.6vw, 2.75rem);
+    --hero-pad: clamp(1.5rem, 2.6vw, 2.75rem);
+    padding: var(--hero-pad);
   }
 
   .hero-card__content {
@@ -332,14 +347,19 @@ const jsonLd = {
     gap: var(--space-6);
     width: 56%;
     min-width: 0;
+    min-height: 0;
   }
 
   .hero-card__media {
     position: absolute;
     top: 0;
-    right: 0;
     bottom: 0;
-    width: 44%;
+    /* Left is anchored past the copy column; right repeats the card's own
+       padding, so the gap between the photograph and the right edge equals the
+       gap between the left edge and the text. */
+    left: 57%;
+    right: var(--hero-pad);
+    width: auto;
     z-index: 1;
     overflow: hidden;
     /* Same lime as the card, so the letterboxing object-fit: contain leaves
@@ -366,21 +386,60 @@ const jsonLd = {
 
   .hero-card__name {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    gap: 0.02em;
+    gap: 0.28em;
+    min-height: 0;
     font-size: var(--text-greeting);
     font-weight: 700;
     line-height: 0.92;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     color: var(--color-accent-ink);
+  }
+
+  /* The greeting is deliberately a different face and a size larger, so it
+     reads as a salutation rather than the first item of the list. */
+  .hero-card__greeting {
+    display: block;
+    flex: none;
+    font-family: var(--font-serif);
+    font-size: var(--text-hello);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--color-accent-ink);
+  }
+
+  /* The stack of phrases. Newest is first; older lines are pushed down and
+     clipped here, so the card never grows no matter how many are added. */
+  .hero-card__roles {
+    --role-lines: 4;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.06em;
+    min-height: 0;
+    /* Hard ceiling on the stack, so the card can never be grown by it. Any
+       line past this is clipped and faded by the mask. */
+    max-height: calc(var(--role-lines) * 0.92em + (var(--role-lines) - 1) * 0.06em);
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, #000 0%, #000 64%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 64%, transparent 100%);
   }
 
   .hero-card__role {
     display: block;
-    min-height: 1em;
-    /* A longer role wraps inside the column instead of running over the
-       photograph. The card's min-height absorbs a second line. */
+    /* A longer phrase wraps inside the column instead of running over the
+       photograph. */
     overflow-wrap: break-word;
+    animation: hero-role-in 320ms var(--ease-out) both;
+  }
+
+  @keyframes hero-role-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.16em);
+    }
   }
 
   /* The caret sits after the typed word and blinks only while JavaScript is
@@ -395,7 +454,7 @@ const jsonLd = {
     animation: hero-caret 1050ms steps(2, start) infinite;
   }
 
-  .hero-card.is-live .hero-card__caret {
+  .hero-card.is-live .hero-card__roles > .hero-card__role:first-child .hero-card__caret {
     display: inline-block;
   }
 
@@ -417,10 +476,6 @@ const jsonLd = {
     letter-spacing: -0.01em;
   }
 
-  .hero-card__mark {
-    color: var(--color-accent-ink);
-    flex: none;
-  }
 
   /* Areas */
   /* Card.astro renders its own root element, so these selectors must be
@@ -561,6 +616,18 @@ const jsonLd = {
       gap: var(--space-5);
     }
 
+    .hero-card__name {
+      flex: none;
+    }
+
+    .hero-card__roles {
+      --role-lines: 3;
+      flex: none;
+      /* Reserved from the start, so the card is the same height before and
+         after lines are added. */
+      min-height: calc(var(--role-lines) * 0.92em + (var(--role-lines) - 1) * 0.06em);
+    }
+
     .hero-card__media {
       position: relative;
       inset: auto;
@@ -576,11 +643,6 @@ const jsonLd = {
   @media (max-width: 560px) {
     .hero-card {
       min-height: 15rem;
-    }
-
-    .hero-card__mark {
-      width: 32px;
-      height: 32px;
     }
   }
 </style>

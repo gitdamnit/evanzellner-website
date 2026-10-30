@@ -38,9 +38,10 @@
   --text-xl: clamp(1.6rem, 1.3rem + 1.4vw, 2.35rem);
   --text-2xl: clamp(2rem, 1.5rem + 2.2vw, 3.25rem);
   --text-hero: clamp(2.85rem, 1.4rem + 6vw, 6.25rem);
-  /* Homepage greeting: sized so "a developer" fits one line inside the hero
-     card at every breakpoint. */
-  --text-greeting: clamp(2.05rem, 0.95rem + 3vw, 3.5rem);
+  /* Homepage hero. The greeting is the largest thing on the page; the stacked
+     roles sit below it a step smaller so several fit without crowding it. */
+  --text-hello: clamp(2.75rem, 1.2rem + 3.8vw, 4rem);
+  --text-greeting: clamp(1.75rem, 0.85rem + 2.1vw, 2.4rem);
 
   /* Space */
   --space-1: 0.25rem;
