@@ -394,7 +394,9 @@ const jsonLd = {
   .hero-card__role {
     display: block;
     min-height: 1em;
-    white-space: nowrap;
+    /* A longer role wraps inside the column instead of running over the
+       photograph. The card's min-height absorbs a second line. */
+    overflow-wrap: break-word;
   }
 
   /* The caret sits after the typed word and blinks only while JavaScript is
