@@ -163,9 +163,15 @@ const sections = [
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    padding-block: var(--space-6);
+    padding-block: var(--space-5) var(--space-4);
     border-top: 1px solid var(--color-line);
-    margin-bottom: var(--space-2);
+    margin-bottom: 0;
+  }
+
+  /* The page header already draws the first rule. */
+  .projects:first-of-type .projects__head {
+    border-top: 0;
+    padding-top: 0;
   }
 
   .projects__index {
