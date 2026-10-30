@@ -4,7 +4,13 @@ import Card from '../components/Card.astro';
 import StarMark from '../components/StarMark.astro';
 import ArrowUpRight from '../components/ArrowUpRight.astro';
 import { featuredProjects, home, identity } from '../data/site';
+import { loadPhotos } from '../data/moviestar';
 import { href } from '../lib/paths';
+
+const photos = await loadPhotos();
+const longestRole = home.hero.roles.reduce((longest, role) =>
+  role.length > longest.length ? role : longest,
+);
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -35,16 +41,52 @@ const jsonLd = {
 >
   <div class="shell">
     <div class="home">
-      <a class="hero-card" href={home.hero.href} aria-label={home.hero.ariaLabel}>
+      <a class="hero-card" href={home.hero.href} aria-label={home.hero.ariaLabel} data-moviestar>
+        <div class="hero-card__media" aria-hidden="true">
+          <img
+            class="hero-card__photo is-active"
+            data-photo="0"
+            src={photos[0].src}
+            width={photos[0].width}
+            height={photos[0].height}
+            alt=""
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+          <img
+            class="hero-card__photo"
+            data-photo="1"
+            src={photos[0].src}
+            alt=""
+            decoding="async"
+          />
+          <div class="hero-card__veil"></div>
+        </div>
+
         <h1 class="hero-card__name">
-          <span>Evan</span>
-          <span>Zellner<span class="hero-card__dot">.</span></span>
+          <span class="hero-card__greeting">{home.hero.greeting}</span>
+          <span class="hero-card__role">
+            <span class="hero-card__sizer" aria-hidden="true">{longestRole}</span>
+            <span class="hero-card__typed"
+              ><span data-typed>{home.hero.roles[0]}</span><span class="hero-card__caret" aria-hidden="true"
+              ></span></span
+            >
+          </span>
         </h1>
+
         <div class="hero-card__foot">
           <p class="hero-card__caption">{home.hero.caption}</p>
           <StarMark size={44} class="hero-card__mark" />
         </div>
       </a>
+
+      <script
+        is:inline
+        type="application/json"
+        id="moviestar-data"
+        set:html={JSON.stringify({ photos, roles: home.hero.roles })}
+      />
 
       <Card
         index={home.about.index}
@@ -145,6 +187,118 @@ const jsonLd = {
       </Card>
     </div>
   </div>
+
+  <script>
+    type Photo = { src: string; width: number; height: number };
+
+    const dataNode = document.getElementById('moviestar-data');
+    const card = document.querySelector<HTMLElement>('[data-moviestar]');
+
+    if (dataNode && card) {
+      const { photos = [], roles = [] } = JSON.parse(dataNode.textContent ?? '{}') as {
+        photos: Photo[];
+        roles: string[];
+      };
+
+      const layers = card.querySelectorAll<HTMLImageElement>('[data-photo]');
+      const typed = card.querySelector<HTMLElement>('[data-typed]');
+      const caret = card.querySelector<HTMLElement>('.hero-card__caret');
+
+      const ROTATE_MS = 15000;
+      const HOLD_MS = 2000;
+      const TYPE_MS = 70;
+      const ERASE_MS = 34;
+      const PAUSE_MS = 320;
+
+      const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      let current = 0;
+      let front = 0;
+
+      /* Crossfades the two stacked <img> layers. Both start on the same photo,
+         so the second one is already cached and the swap is invisible until the
+         new file loads. */
+      const paint = (index: number) => {
+        const photo = photos[index];
+        if (!photo) return;
+
+        const next = layers[front ^ 1];
+        if (!next) return;
+
+        const reveal = () => {
+          next.classList.add('is-active');
+          layers[front]?.classList.remove('is-active');
+          front ^= 1;
+        };
+
+        next.width = photo.width;
+        next.height = photo.height;
+        next.src = photo.src;
+
+        if (next.complete) reveal();
+        else next.addEventListener('load', reveal, { once: true });
+      };
+
+      if (photos.length > 1) {
+        // Start on a random picture so two visits do not open the same way.
+        current = Math.floor(Math.random() * photos.length);
+        const first = layers[0];
+        const photo = photos[current];
+        if (first && photo) {
+          first.width = photo.width;
+          first.height = photo.height;
+          first.src = photo.src;
+        }
+
+        setInterval(() => {
+          if (document.hidden || photos.length < 2) return;
+          let next = current;
+          while (next === current) next = Math.floor(Math.random() * photos.length);
+          current = next;
+          paint(next);
+        }, ROTATE_MS);
+      }
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion) {
+        // The full phrase is already in the HTML; just stop the caret blinking.
+        caret?.remove();
+      } else if (typed && roles.length > 1) {
+        card.classList.add('is-live');
+
+        const erase = async () => {
+          let text = typed.textContent ?? '';
+          while (text.length > 0) {
+            text = text.slice(0, -1);
+            typed.textContent = text;
+            await sleep(ERASE_MS);
+          }
+        };
+
+        const type = async (text: string) => {
+          for (let i = 1; i <= text.length; i += 1) {
+            typed.textContent = text.slice(0, i);
+            await sleep(TYPE_MS);
+          }
+        };
+
+        const cycle = async () => {
+          let index = 0;
+          await sleep(HOLD_MS);
+          for (;;) {
+            await erase();
+            index = (index + 1) % roles.length;
+            await sleep(PAUSE_MS);
+            await type(roles[index] ?? '');
+            await sleep(HOLD_MS);
+          }
+        };
+
+        void cycle();
+      }
+    }
+  </script>
 </BaseLayout>
 
 <style>
@@ -158,6 +312,9 @@ const jsonLd = {
   /* Hero */
   .hero-card {
     grid-column: span 7;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -167,28 +324,113 @@ const jsonLd = {
     color: var(--color-accent-ink);
     border-radius: var(--radius-card);
     padding: clamp(1.5rem, 2.6vw, 2.75rem);
-    transition: background var(--duration-base) var(--ease-out);
   }
 
-  .hero-card:hover {
-    background: var(--color-accent-bright);
+  .hero-card__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-card__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Photographs are portraits: bias the crop upward so heads are not clipped. */
+    object-position: 50% 30%;
+    opacity: 0;
+    transform: scale(1.02);
+    transition:
+      opacity 1200ms var(--ease-out),
+      transform 9000ms linear;
+  }
+
+  .hero-card__photo.is-active {
+    opacity: 1;
+    transform: scale(1.09);
+  }
+
+  .hero-card:hover .hero-card__photo.is-active {
+    transform: scale(1.13);
+  }
+
+  /* A light lime cast ties the photographs to the palette without hiding them.
+     Text never relies on it for contrast: the greeting and caption sit on solid
+     lime plates, so measured contrast is exact regardless of the picture. */
+  .hero-card__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: color-mix(in srgb, var(--color-accent) 26%, transparent);
   }
 
   .hero-card__name {
+    position: relative;
+    z-index: 2;
+    align-self: flex-start;
     display: flex;
     flex-direction: column;
-    font-size: var(--text-hero);
+    align-items: flex-start;
+    gap: 0.04em;
+    font-size: var(--text-greeting);
     font-weight: 700;
-    line-height: 0.9;
-    letter-spacing: -0.045em;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
     color: var(--color-accent-ink);
+    background: var(--color-accent);
+    border-radius: 10px;
+    padding: 0.1em 0.24em 0.14em;
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+    max-width: 100%;
   }
 
-  .hero-card__dot {
-    color: color-mix(in srgb, var(--color-accent-ink) 55%, transparent);
+  .hero-card__role {
+    position: relative;
+    display: block;
+    min-height: 1em;
+  }
+
+  /* Reserves the width of the longest role so the lime plate never resizes
+     while the text is being typed. */
+  .hero-card__sizer {
+    display: block;
+    visibility: hidden;
+  }
+
+  .hero-card__typed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+  }
+
+  /* The caret sits after the typed word and blinks only while JavaScript is
+     driving the animation. */
+  .hero-card__caret {
+    display: none;
+    width: 0.055em;
+    height: 0.76em;
+    margin-left: 0.07em;
+    background: currentColor;
+    transform: translateY(0.03em);
+    animation: hero-caret 1050ms steps(2, start) infinite;
+  }
+
+  .hero-card.is-live .hero-card__caret {
+    display: inline-block;
+  }
+
+  @keyframes hero-caret {
+    to {
+      visibility: hidden;
+    }
   }
 
   .hero-card__foot {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -198,10 +440,17 @@ const jsonLd = {
   .hero-card__caption {
     font-size: var(--text-md);
     letter-spacing: -0.01em;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-radius: var(--radius-pill);
+    padding: 0.34em 0.78em;
   }
 
   .hero-card__mark {
     color: var(--color-accent-ink);
+    background: var(--color-accent);
+    border-radius: var(--radius-pill);
+    padding: 0.32rem;
     flex: none;
   }
 

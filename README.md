@@ -53,6 +53,14 @@ no longer a staging target.
 See [`deploy/GITHUB-PAGES.md`](deploy/GITHUB-PAGES.md) for the workflow, the DNS
 records in use, and the rollback values.
 
+## Homepage photographs
+
+The hero cycles through 63 photographs of Evan as film characters. Drop a PNG
+into `src/assets/moviestar/` and it is picked up automatically — Astro optimises
+it to WebP at build time, and the page only downloads a picture when it is about
+to be shown. The roles after "Hi. I'm" live in `src/data/site.ts`
+(`home.hero.roles`). See D-0011.
+
 ## Documents
 
 - [`PRODUCT_REQUIREMENTS.md`](PRODUCT_REQUIREMENTS.md) — what the site must do

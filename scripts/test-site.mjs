@@ -37,7 +37,55 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// 4. Résumé PDF download
+// 4. Homepage hero: rotating photographs and the typed greeting
+{
+  const page = await browser.newPage();
+  await page.goto(base + '/', { waitUntil: 'networkidle' });
+
+  const greeting = (await page.locator('.hero-card__greeting').textContent())?.trim();
+  greeting === "Hi. I'm" ? pass('hero greeting present') : fail(`hero greeting was "${greeting}"`);
+
+  const role = (await page.locator('[data-typed]').textContent())?.trim() ?? '';
+  role.length > 0
+    ? pass(`hero role is in the HTML: "${role}"`)
+    : fail('hero role is empty before JavaScript runs');
+
+  const payload = await page.evaluate(() =>
+    JSON.parse(document.getElementById('moviestar-data')?.textContent ?? '{}'),
+  );
+  const photos = payload.photos ?? [];
+  const roles = payload.roles ?? [];
+  photos.length >= 10
+    ? pass(`${photos.length} rotating photographs, ${roles.length} roles`)
+    : fail(`only ${photos.length} photographs configured`);
+
+  // Every optimised photograph must exist in the build.
+  const statuses = await Promise.all(
+    photos.map(async (photo) => (await page.request.head(base + photo.src)).status()),
+  );
+  const broken = statuses.filter((code) => code !== 200).length;
+  broken === 0 ? pass(`all ${photos.length} photographs resolve`) : fail(`${broken} photographs 404`);
+
+  // The lime plate must not resize as the typed word grows and shrinks.
+  const widths = await page.evaluate(() => {
+    const typed = document.querySelector('[data-typed]');
+    const plate = document.querySelector('.hero-card__name');
+    if (!typed || !plate) return [0, 0];
+    const original = typed.textContent;
+    const before = plate.getBoundingClientRect().width;
+    typed.textContent = 'a';
+    const after = plate.getBoundingClientRect().width;
+    typed.textContent = original;
+    return [before, after];
+  });
+  Math.abs(widths[0] - widths[1]) < 1
+    ? pass('hero plate width is stable while typing')
+    : fail(`hero plate resized ${widths[0]} -> ${widths[1]}`);
+
+  await page.close();
+}
+
+// 5. Résumé PDF download
 {
   const page = await browser.newPage();
   await page.goto(base + '/resume/', { waitUntil: 'networkidle' });
@@ -49,7 +97,7 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// 5. Contact form: validation and mailto draft, no network submission
+// 6. Contact form: validation and mailto draft, no network submission
 {
   const page = await browser.newPage();
   const requests = [];
@@ -83,7 +131,37 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-// 6. Mobile overflow on every page
+// 7. Hero fallbacks: reduced motion and no JavaScript
+{
+  const reducedContext = await browser.newContext({ reducedMotion: 'reduce' });
+  const reduced = await reducedContext.newPage();
+  await reduced.goto(base + '/', { waitUntil: 'networkidle' });
+  await reduced.waitForTimeout(2600);
+  const reducedRole = (await reduced.locator('[data-typed]').textContent())?.trim();
+  reducedRole === 'a developer'
+    ? pass('reduced motion keeps the first role static')
+    : fail(`reduced motion changed the role to "${reducedRole}"`);
+  const carets = await reduced.locator('.hero-card__caret').count();
+  carets === 0 ? pass('reduced motion removes the caret') : fail('caret still present under reduced motion');
+  await reducedContext.close();
+
+  const noJsContext = await browser.newContext({ javaScriptEnabled: false });
+  const noJs = await noJsContext.newPage();
+  await noJs.goto(base + '/', { waitUntil: 'domcontentloaded' });
+  const noJsRole = (await noJs.locator('[data-typed]').textContent())?.trim();
+  noJsRole === 'a developer'
+    ? pass('role renders with JavaScript disabled')
+    : fail(`role without JavaScript was "${noJsRole}"`);
+  const photoLoaded = await noJs
+    .locator('[data-photo][data-photo="0"]')
+    .evaluate((img) => img.complete && img.naturalWidth > 0);
+  photoLoaded ? pass('first photograph loads with JavaScript disabled') : fail('no photograph without JavaScript');
+  const noJsCaret = await noJs.locator('.hero-card__caret').isVisible();
+  noJsCaret ? fail('caret is visible with JavaScript disabled') : pass('caret hidden with JavaScript disabled');
+  await noJsContext.close();
+}
+
+// 8. Mobile overflow on every page
 {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   for (const path of ['/', '/projects/', '/resume/', '/about/', '/contact/']) {

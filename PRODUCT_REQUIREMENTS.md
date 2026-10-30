@@ -36,6 +36,7 @@ The site is a static publication. It does not store visitor data, run a backend,
 | FR-8 | The contact form opens a draft in the visitor's own email client and states that nothing has been sent | Form validates name, email, and message; status text says nothing has been sent; no non-GET request is made |
 | FR-9 | Every internal link, asset, and in-page anchor resolves in the built output | `npm run check:links` exits 0 |
 | FR-10 | The site builds to static HTML, CSS, and JS with no server runtime | `dist/` contains only static files; GitHub Pages serves it |
+| FR-11 | The homepage hero cycles a random photograph from `src/assets/moviestar/` every 15 seconds and types then erases a rotating role after "Hi. I'm" | Photograph changes every 15 s; roles cycle; copy and one photograph render with JavaScript off; reduced motion stops both animations |
 
 ## Nonfunctional Requirements
 

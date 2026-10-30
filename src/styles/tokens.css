@@ -38,6 +38,9 @@
   --text-xl: clamp(1.6rem, 1.3rem + 1.4vw, 2.35rem);
   --text-2xl: clamp(2rem, 1.5rem + 2.2vw, 3.25rem);
   --text-hero: clamp(2.85rem, 1.4rem + 6vw, 6.25rem);
+  /* Homepage greeting: sized so "a developer" fits one line inside the hero
+     card at every breakpoint. */
+  --text-greeting: clamp(2.05rem, 0.95rem + 3.4vw, 4.1rem);
 
   /* Space */
   --space-1: 0.25rem;

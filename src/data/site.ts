@@ -24,7 +24,8 @@ export type NavKey = (typeof navItems)[number]['key'];
 /** Homepage copy, fixed by the approved design. */
 export const home = {
   hero: {
-    nameLines: ['Evan', 'Zellner.'],
+    greeting: "Hi. I'm",
+    roles: ['a developer', 'a recruiter', 'a builder', 'a writer', 'a gardener'],
     caption: 'A little about me.',
     href: href('/about/'),
     ariaLabel: 'A little about me — go to the About page',

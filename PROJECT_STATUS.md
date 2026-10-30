@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** 4ce6d8921f5c40d0ae8b6be8ce083a77b2b6781c
+- **Observed commit:** 412e876e74c29c049e38f546c4e6561630e79b13
 - **Observed working tree:** dirty
-- **Observed at:** 2026-10-30T15:42:30Z
+- **Observed at:** 2026-10-30T16:19:12Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -47,7 +47,11 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Deployed] Custom domain cut over: apex `A`/`AAAA` replaced with GitHub's addresses, `www` pointed at `gitdamnit.github.io`, four dead subdomains removed, all records DNS-only (D-0010) — Cloudflare zone `8085a44df807cf8aa8a14c515de1c71d`, 30 Oct 2026
 - [Implemented] `BASE_PATH` removed from the Pages workflow and `deploy/CNAME` copied to `public/CNAME`, so builds serve from `/` — `.github/workflows/pages.yml`, `public/CNAME`
 - [Deployed] GitHub Pages custom domain set to `evanzellner.com` with a certificate covering apex and `www`; "Enforce HTTPS" enabled — repository Pages settings, 30 Oct 2026
-- [Tested] `https://evanzellner.com/` returns 200 from GitHub, serves the correct `<title>`, redirects `http`→`https` and `www`→apex, and passes all 15 assertions — `TEST_BASE_URL=https://evanzellner.com npm run test:site`, 30 Oct 2026
+- [Tested] `https://evanzellner.com/` returns 200 from GitHub, serves the correct `<title>`, redirects `http`→`https` and `www`→apex, and passes all assertions — `TEST_BASE_URL=https://evanzellner.com npm run test:site`, 30 Oct 2026
+- [Implemented] Homepage hero cycles 63 photographs of the owner as film characters every 15 s and types/erases five roles after "Hi. I'm" — `src/data/moviestar.ts`, `src/pages/index.astro` (D-0011, FR-11)
+- [Implemented] Greeting sits on a solid lime plate, so text contrast is 15.32:1 regardless of the photograph behind it — `src/pages/index.astro`
+- [Tested] Hero: greeting in HTML, role in HTML before JavaScript, 63 photographs all resolve, plate width stable while typing — `scripts/test-site.mjs`
+- [Tested] Hero fallbacks: reduced motion keeps the first role static and removes the caret; JavaScript off renders the role, loads the first photograph, and hides the caret — `scripts/test-site.mjs`
 
 ## Tests
 
@@ -56,13 +60,13 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 | Type, template, and integrity check | `npx astro check` | Pass (23 files, 0 errors, 0 warnings, 0 hints) | local run, 30 Oct 2026 |
 | Production build | `npm run build` | Pass (6 pages) | `dist/` |
 | Internal links, assets, anchors | `npm run check:links` | Pass (75 links, 22 assets, 0 failures) | local run, 30 Oct 2026 |
-| Functional suite | `npm run test:site` | Pass (15 assertions) | `scripts/test-site.mjs` |
+| Functional suite | `npm run test:site` | Pass (25 assertions) | `scripts/test-site.mjs`, 30 Oct 2026 |
 | External repository and release links | manual `curl` sweep | Pass (15 URLs, all 200) | local run, 30 Oct 2026 |
 | Contrast | computed WCAG ratios for every text/surface pair | Pass (lowest 4.76:1, body text 14.79:1) | local calculation, 30 Oct 2026 |
 | Visual sweep | Playwright captures at 1440 px and 390 px | Pass (7 captures, no overflow, no console errors) | local run, 30 Oct 2026 |
 | GitHub Actions build | `pages.yml` on push | Pass (run 41068177574, build + deploy jobs) | https://github.com/gitdamnit/evanzellner-website/actions/runs/41068177574 |
 | Pages deployment smoke test | `TEST_BASE_URL=https://gitdamnit.github.io/evanzellner-website npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
-| Custom domain functional suite | `TEST_BASE_URL=https://evanzellner.com npm run test:site` | Pass (15 assertions) | local run, 30 Oct 2026 |
+| Custom domain functional suite | `TEST_BASE_URL=https://evanzellner.com npm run test:site` | Pass (15 assertions, before the hero change) | local run, 30 Oct 2026 |
 | Custom domain resolution | `dig evanzellner.com` at 1.1.1.1, 8.8.8.8, and authoritative | Pass (4×`185.199.*` A, 4×`2606:50c0:*` AAAA) | local run, 30 Oct 2026 |
 | Custom domain certificate | `openssl s_client` + Pages certificate state | Pass (`approved`, apex and `www`, expires 15 Jan 2027) | local run, 30 Oct 2026 |
 | HTTPS enforcement | `curl -I http://evanzellner.com/` | Pass (301 → `https://evanzellner.com/`) | local run, 30 Oct 2026 |
