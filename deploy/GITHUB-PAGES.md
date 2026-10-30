@@ -64,12 +64,21 @@ Repository → **Settings → Pages → Custom domain** → enter `evanzellner.c
 **Save**. GitHub writes the `CNAME` file into the deployed artifact; the copy in
 this repository stays out of `public/` on purpose (D-0007).
 
-### 5. Enforce HTTPS
+### 5. Drop the staging base path
+
+The staging build sets `BASE_PATH=/evanzellner-website/` in
+`.github/workflows/pages.yml` because a project site is served from a subpath
+(D-0009). On the custom domain the site is served from `/`, so **remove both
+`BASE_PATH` entries from the workflow** before the custom domain goes live.
+Otherwise every link and stylesheet still points at `/evanzellner-website/…`
+and the site renders unstyled.
+
+### 6. Enforce HTTPS
 
 After DNS propagates and GitHub issues the certificate (usually minutes, up to
 24 hours), tick **Enforce HTTPS** in the same panel.
 
-### 6. Verify before announcing
+### 7. Verify before announcing
 
 Run these in order and keep the output:
 

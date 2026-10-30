@@ -107,7 +107,9 @@ Limitations worth recording, none of which are defects:
    the certificate, and keep the old records for rollback.
 2. Owner sets the custom domain to `evanzellner.com` in repository settings, then
    copies `deploy/CNAME` to `public/CNAME` and pushes.
-3. Confirm the certificate and enable "Enforce HTTPS"; re-run the smoke test with
+3. Remove `BASE_PATH` from `.github/workflows/pages.yml` so the custom-domain
+   build serves from `/` (D-0009), then confirm the certificate and enable
+   "Enforce HTTPS"; re-run the smoke test with
    `TEST_BASE_URL=https://evanzellner.com`.
 4. Re-check the project inventory against GitHub when a new release is tagged.
 
