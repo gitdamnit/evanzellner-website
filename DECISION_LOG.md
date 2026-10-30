@@ -190,3 +190,14 @@ Allowed statuses: `Proposed`, `Accepted`, `Superseded`, `Deprecated`, `Rejected`
 - **Rationale:** Keeping the approval status in the data makes "never publish an unapproved line" a property of the data rather than a matter of care, and it means the rejected candidates stay on record instead of being lost.
 - **Consequences:** Because the stack is a rolling log, a caption from a previous photograph stays visible further down while a new one is on screen; the current picture's caption is always present but not always the only one. Twelve characters are rejected and two are pending, so roughly a third of the rotation shows personal lines only. `scripts/test-site.mjs` asserts that the visible line belongs to the visible photograph, that unapproved captions never appear across a full rotation, and that the stack never changes the card's height.
 - **Supersedes:** None (extends D-0014; replaces the invented lines it introduced)
+
+### D-0016 — Publish the About page in the owner's own voice, verbatim
+
+- **Date:** 2026-10-30
+- **Status:** Accepted
+- **Context:** The About page was written third-person and evidence-led: every claim traced to the résumé or a project case study, with sections on recruiting history, ATS migration, and why the tools exist. The owner replaced it wholesale with a first-person piece about competing interests, personality, and how he thinks, and asked for it to appear exactly as supplied.
+- **Alternatives Considered:** Keep the résumé-derived page (rejected: the owner supplied replacement copy); edit the supplied text for tone, punctuation or profanity (rejected: "exactly this"); keep the "Three other doors" navigation block below the new copy (rejected: it is not part of the supplied text, and the primary navigation already links to all three destinations).
+- **Decision:** `src/data/about.ts` holds the supplied copy unchanged, including two instances of profanity ("asshole", "fucking"), straight apostrophes, and the informal register. The page renders the four intro paragraphs plus four numbered sections (The personality, The interests, The projects, The philosophy). The "Three other doors" block and its styles are removed. The meta description is rewritten to match the new content rather than the old résumé framing.
+- **Rationale:** This page is the one place on the site that is purely the owner's voice. Editing it for evidence or polish would defeat the purpose, and the earlier version's tone contradicted the homepage.
+- **Consequences:** The page no longer cites the résumé, so statements about his work history now live only on the Résumé page. Removing the doors block drops three internal links; `check:links` still passes with 72 links. The published text contains profanity, which a recruiter-facing audience will see; this is intentional and owned.
+- **Supersedes:** None

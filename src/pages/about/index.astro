@@ -1,20 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import ArrowUpRight from '../../components/ArrowUpRight.astro';
-import StarMark from '../../components/StarMark.astro';
-import { aboutPage, doors } from '../../data/about';
+import { aboutPage } from '../../data/about';
 ---
 
 <BaseLayout
   title="About — Evan Zellner"
-  description="The longer story: where Evan Zellner came from, what he is curious about, and why the projects exist."
+  description="Evan Zellner on curiosity, competing interests, the projects that follow, and thinking for yourself."
   active="about"
   path="/about/"
   ogType="profile"
 >
   <div class="shell">
-    <PageHeader eyebrow={aboutPage.eyebrow} title={aboutPage.title} lede={aboutPage.lede} />
+    <PageHeader eyebrow={aboutPage.eyebrow} title={aboutPage.title} />
+
+    <div class="intro">
+      {aboutPage.intro.map((paragraph) => <p class="intro__paragraph">{paragraph}</p>)}
+    </div>
 
     <div class="sections">
       {
@@ -37,29 +39,25 @@ import { aboutPage, doors } from '../../data/about';
       }
     </div>
 
-    <section class="doors" aria-labelledby="doors-title">
-      <div class="doors__head">
-        <StarMark size={20} class="doors__mark" />
-        <h2 class="doors__title" id="doors-title">Three other doors.</h2>
-      </div>
-      <ul class="doors__list">
-        {
-          doors.map((door) => (
-            <li>
-              <a class="door" href={door.href}>
-                <span class="door__label">{door.label}</span>
-                <span class="door__description">{door.description}</span>
-                <ArrowUpRight size={11} />
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
   </div>
 </BaseLayout>
 
 <style>
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: var(--measure);
+    padding-bottom: var(--space-6);
+  }
+
+  .intro__paragraph {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--color-text-soft);
+  }
+
   .sections {
     display: flex;
     flex-direction: column;
@@ -101,76 +99,6 @@ import { aboutPage, doors } from '../../data/about';
     font-size: var(--text-md);
     line-height: 1.65;
     color: var(--color-text-soft);
-  }
-
-  .doors {
-    margin-top: var(--space-7);
-    padding: clamp(1.5rem, 3vw, 2.5rem);
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-card);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-  }
-
-  .doors__head {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .doors__mark {
-    color: var(--color-accent);
-  }
-
-  .doors__title {
-    font-size: var(--text-lg);
-    font-weight: 500;
-  }
-
-  .doors__list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-    gap: var(--space-3);
-  }
-
-  .door {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-4);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-sm);
-    transition: border-color var(--duration-fast) var(--ease-out),
-      background var(--duration-fast) var(--ease-out);
-  }
-
-  .door:hover {
-    border-color: var(--color-line-strong);
-    background: var(--color-surface-raised);
-  }
-
-  .door__label {
-    grid-column: 1;
-    grid-row: 1;
-    font-size: var(--text-sm);
-    font-weight: 600;
-  }
-
-  /* The arrow is a component root, so it needs :global() to be matched here. */
-  .door :global(svg) {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: center;
-  }
-
-  .door__description {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
   }
 
   @media (max-width: 760px) {
