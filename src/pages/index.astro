@@ -1,0 +1,344 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Card from '../components/Card.astro';
+import StarMark from '../components/StarMark.astro';
+import ArrowUpRight from '../components/ArrowUpRight.astro';
+import { featuredProjects, home, identity } from '../data/site';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: identity.name,
+  url: 'https://evanzellner.com/',
+  email: `mailto:${identity.email}`,
+  jobTitle: 'Technical Recruiter and Independent Developer',
+  description:
+    'Human resources and technical recruiting professional, now building developer tooling and automation.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Wichita Falls',
+    addressRegion: 'TX',
+    addressCountry: 'US',
+  },
+  sameAs: [identity.linkedin, identity.github],
+};
+---
+
+<BaseLayout
+  title="Evan Zellner — Curiosity is the starting point"
+  description="Evan Zellner: technical recruiter, HR generalist, and independent developer in Wichita Falls, Texas. Projects, background, and the stories behind them."
+  active="home"
+  path="/"
+  ogType="profile"
+  jsonLd={jsonLd}
+>
+  <div class="shell">
+    <div class="home">
+      <a class="hero-card" href={home.hero.href} aria-label={home.hero.ariaLabel}>
+        <h1 class="hero-card__name">
+          <span>Evan</span>
+          <span>Zellner<span class="hero-card__dot">.</span></span>
+        </h1>
+        <div class="hero-card__foot">
+          <p class="hero-card__caption">{home.hero.caption}</p>
+          <StarMark size={44} class="hero-card__mark" />
+        </div>
+      </a>
+
+      <Card
+        index={home.about.index}
+        section={home.about.section}
+        pill={home.about.pill}
+        pillHref="/about/"
+        class="area-about"
+      >
+        <h2 class="card-title">{home.about.title}</h2>
+        <div class="prose">
+          {home.about.paragraphs.map((paragraph) => <p class="card-body">{paragraph}</p>)}
+        </div>
+        <div class="card-foot">
+          <a class="rule-link" href={home.about.link.href}>
+            {home.about.link.label}
+            <ArrowUpRight />
+          </a>
+        </div>
+      </Card>
+
+      <Card
+        index={home.resume.index}
+        section={home.resume.section}
+        pill={home.resume.pill}
+        pillHref="/resume/"
+        class="area-resume"
+      >
+        <h2 class="card-title">{home.resume.title}</h2>
+        <div class="prose">
+          {home.resume.paragraphs.map((paragraph) => <p class="card-body">{paragraph}</p>)}
+        </div>
+        <ul class="tags">
+          {home.resume.tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
+        <div class="card-foot">
+          <a class="rule-link" href={home.resume.link.href}>
+            {home.resume.link.label}
+            <ArrowUpRight />
+          </a>
+        </div>
+      </Card>
+
+      <Card
+        index={home.projects.index}
+        section={home.projects.section}
+        pill={home.projects.pill}
+        pillHref="/projects/"
+        class="area-projects"
+      >
+        <h2 class="card-title">
+          {home.projects.titleLead}<br />
+          {home.projects.titleTurn}
+        </h2>
+
+        <div class="projects-grid">
+          <div class="projects-col">
+            <div class="prose">
+              {home.projects.paragraphs.map((paragraph) => <p class="card-body">{paragraph}</p>)}
+            </div>
+            <ul class="projects-links">
+              {
+                home.projects.links.map((item) => (
+                  <li>
+                    <a class="rule-link" href={item.href}>
+                      {item.label}
+                      <ArrowUpRight />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          <div class="projects-col projects-col--list">
+            <ol class="featured">
+              {
+                featuredProjects.map((project) => (
+                  <li>
+                    <a class="featured__row" href={project.href} rel="noopener">
+                      <span class="featured__index">{project.index}</span>
+                      <span class="featured__title">{project.title}</span>
+                      <ArrowUpRight size={11} />
+                    </a>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+        </div>
+
+        <div class="card-foot card-foot--split">
+          <a class="rule-link" href={home.projects.link.href}>
+            {home.projects.link.label}
+            <ArrowUpRight />
+          </a>
+          <p class="card-caption">{home.projects.footer}</p>
+        </div>
+      </Card>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .home {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--gap-card);
+    padding-bottom: var(--space-6);
+  }
+
+  /* Hero */
+  .hero-card {
+    grid-column: span 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-7);
+    min-height: clamp(18rem, 26vw, 24rem);
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-radius: var(--radius-card);
+    padding: clamp(1.5rem, 2.6vw, 2.75rem);
+    transition: background var(--duration-base) var(--ease-out);
+  }
+
+  .hero-card:hover {
+    background: var(--color-accent-bright);
+  }
+
+  .hero-card__name {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--text-hero);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    color: var(--color-accent-ink);
+  }
+
+  .hero-card__dot {
+    color: color-mix(in srgb, var(--color-accent-ink) 55%, transparent);
+  }
+
+  .hero-card__foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .hero-card__caption {
+    font-size: var(--text-md);
+    letter-spacing: -0.01em;
+  }
+
+  .hero-card__mark {
+    color: var(--color-accent-ink);
+    flex: none;
+  }
+
+  /* Areas */
+  /* Card.astro renders its own root element, so these selectors must be
+     :global() or Astro's scope attribute will not match them. */
+  .home :global(.area-about) {
+    grid-column: span 5;
+  }
+
+  .home :global(.area-resume) {
+    grid-column: span 4;
+  }
+
+  .home :global(.area-projects) {
+    grid-column: span 8;
+  }
+
+  /* Shared card content */
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 46ch;
+  }
+
+  .card-foot {
+    margin-top: auto;
+    padding-top: var(--space-1);
+  }
+
+  .card-foot--split {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  .card-caption {
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .tag {
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.6rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* Projects card */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1rem, 2.5vw, 2.5rem);
+    align-items: start;
+  }
+
+  .projects-col {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 2vw, 1.75rem);
+    min-width: 0;
+  }
+
+  .projects-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+
+  .featured {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .featured__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-line);
+    font-size: var(--text-sm);
+    color: var(--color-text-soft);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .featured__row:hover {
+    color: var(--color-accent);
+  }
+
+  .featured__index {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-faint);
+  }
+
+  .featured__title {
+    flex: 1;
+  }
+
+  /* Responsive */
+  @media (max-width: 1080px) {
+    .hero-card,
+    .home :global(.area-about) {
+      grid-column: span 12;
+    }
+
+    .home :global(.area-resume),
+    .home :global(.area-projects) {
+      grid-column: span 12;
+    }
+
+    .projects-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .hero-card {
+      min-height: 15rem;
+    }
+
+    .hero-card__mark {
+      width: 32px;
+      height: 32px;
+    }
+  }
+</style>

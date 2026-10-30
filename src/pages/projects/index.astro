@@ -1,0 +1,333 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ArrowUpRight from '../../components/ArrowUpRight.astro';
+import {
+  completedProjects,
+  inDevelopmentProjects,
+  projectCounts,
+} from '../../data/projects';
+
+const sections = [
+  {
+    id: 'completed-projects',
+    index: '01',
+    eyebrow: 'Completed projects',
+    title: 'Released, tagged, and in use.',
+    lede: `${projectCounts.completed} projects with a public, tagged release. Every link below points at a real repository or release.`,
+    projects: completedProjects,
+    tone: 'released' as const,
+  },
+  {
+    id: 'current-development',
+    index: '02',
+    eyebrow: 'Current development',
+    title: 'Building, not shipping.',
+    lede: `${projectCounts.inDevelopment} projects under active development. None of them has a public release, and none is described here as finished.`,
+    projects: inDevelopmentProjects,
+    tone: 'development' as const,
+  },
+];
+---
+
+<BaseLayout
+  title="Projects — Evan Zellner"
+  description="Tools Evan Zellner has designed and built: released MCP servers, OpenCode plugins, and documentation systems, plus the projects still under development."
+  active="projects"
+  path="/projects/"
+>
+  <div class="shell">
+    <PageHeader
+      eyebrow="Projects"
+      title="Less “what if.” More “let’s build it.”"
+      lede="Tools for AI workflows. Plugins that solve actual problems. Experiments that turn into something useful."
+    >
+      <nav class="jump" aria-label="Project sections">
+        {
+          sections.map((section) => (
+            <a class="jump__link" href={`#${section.id}`}>
+              {section.eyebrow}
+              <span class="jump__count">{section.projects.length}</span>
+            </a>
+          ))
+        }
+      </nav>
+    </PageHeader>
+
+    {
+      sections.map((section) => (
+        <section class="projects" id={section.id} aria-labelledby={`${section.id}-title`}>
+          <header class="projects__head">
+            <p class="eyebrow">
+              <span class="projects__index">{section.index}</span>
+              {section.eyebrow}
+            </p>
+            <h2 class="projects__title" id={`${section.id}-title`}>
+              {section.title}
+            </h2>
+            <p class="projects__lede">{section.lede}</p>
+          </header>
+
+          <ol class="project-list">
+            {section.projects.map((project, index) => (
+              <li class="project">
+                <div class="project__index">{String(index + 1).padStart(2, '0')}</div>
+
+                <div class="project__main">
+                  <div class="project__title-row">
+                    <h3 class="project__name">{project.title}</h3>
+                    {project.version ? (
+                      <span class="badge badge--released">{project.version}</span>
+                    ) : (
+                      <span class="badge badge--development">In development</span>
+                    )}
+                  </div>
+
+                  <p class="project__summary">{project.summary}</p>
+
+                  <ul class="project__stack">
+                    {project.stack.map((item) => <li class="chip">{item}</li>)}
+                  </ul>
+
+                  {project.note && <p class="project__note">{project.note}</p>}
+                </div>
+
+                <div class="project__links">
+                  {project.repo && (
+                    <a class="project__link" href={project.repo} rel="noopener">
+                      Repository
+                      <ArrowUpRight size={10} />
+                    </a>
+                  )}
+                  {project.releaseUrl && (
+                    <a class="project__link" href={project.releaseUrl} rel="noopener">
+                      Release
+                      <ArrowUpRight size={10} />
+                    </a>
+                  )}
+                  {!project.repo && !project.releaseUrl && (
+                    <span class="project__private">Private</span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))
+    }
+
+    <p class="disclaimer">
+      Status and versions were read from the GitHub API on 30 October 2026. A project appears
+      under Completed only when a tagged release exists; everything else is listed as in
+      development. Private repositories are named without a link.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .jump {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: var(--space-3);
+  }
+
+  .jump__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.75rem;
+    font-size: var(--text-sm);
+    color: var(--color-text-soft);
+    transition: border-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  .jump__link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .jump__count {
+    font-size: 0.625rem;
+    color: var(--color-text-faint);
+  }
+
+  .projects {
+    padding-bottom: var(--space-8);
+  }
+
+  .projects__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--color-line);
+    margin-bottom: var(--space-2);
+  }
+
+  .projects__index {
+    color: var(--color-accent);
+    margin-right: var(--space-2);
+  }
+
+  .projects__title {
+    font-size: var(--text-xl);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  .projects__lede {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    max-width: var(--measure);
+  }
+
+  .project-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .project {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: clamp(0.75rem, 2vw, 2rem);
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .project__index {
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    color: var(--color-text-faint);
+    padding-top: 0.35rem;
+  }
+
+  .project__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+    max-width: var(--measure);
+  }
+
+  .project__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .project__name {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .badge {
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-text-muted);
+  }
+
+  .badge--released {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+
+  .badge--development {
+    border-style: dashed;
+  }
+
+  .project__summary {
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    color: var(--color-text-soft);
+  }
+
+  .project__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+  }
+
+  .chip {
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    padding: 0.15rem 0.5rem;
+  }
+
+  .project__note {
+    font-size: var(--text-xs);
+    color: var(--color-text-faint);
+  }
+
+  .project__links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-2);
+    padding-top: 0.2rem;
+  }
+
+  .project__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-line-strong);
+    padding-bottom: 1px;
+    transition: color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .project__link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .project__private {
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .disclaimer {
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-line);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+    color: var(--color-text-faint);
+    max-width: var(--measure);
+  }
+
+  @media (max-width: 720px) {
+    .project {
+      grid-template-columns: 2rem minmax(0, 1fr);
+    }
+
+    .project__links {
+      grid-column: 2;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-4);
+      padding-top: 0;
+    }
+  }
+</style>

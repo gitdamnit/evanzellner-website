@@ -1,0 +1,154 @@
+---
+import ArrowUpRight from './ArrowUpRight.astro';
+import { identity, navItems, type NavKey } from '../data/site';
+
+interface Props {
+  active: NavKey;
+}
+const { active } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="shell site-header__inner">
+    <a class="brand" href="/" aria-label="Evan Zellner — home">
+      <span>{identity.name}</span><span class="brand__dot" aria-hidden="true">.</span>
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <ul>
+        {
+          navItems.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={['nav-link', { 'nav-link--active': item.key === active }]}
+                aria-current={item.key === active ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <ul class="utility-nav">
+      <li>
+        <a class="utility-link" href={identity.github} rel="me">
+          <span>{identity.githubLabel}</span>
+          <ArrowUpRight />
+        </a>
+      </li>
+      <li>
+        <a class="utility-link" href={identity.linkedin} rel="me">
+          <span>{identity.linkedinLabel}</span>
+          <ArrowUpRight />
+        </a>
+      </li>
+      <li>
+        <a class="utility-link" href={`mailto:${identity.email}`}>
+          <span>Email</span>
+          <ArrowUpRight />
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    padding-block: var(--space-5) var(--space-6);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 2.5vw, 2.5rem);
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    font-size: var(--text-md);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+  }
+
+  .brand__dot {
+    color: var(--color-accent);
+  }
+
+  .primary-nav ul {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 1.6vw, 1.6rem);
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    position: relative;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    padding-block: 2px;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .nav-link:hover {
+    color: var(--color-text);
+  }
+
+  .nav-link--active {
+    color: var(--color-text);
+  }
+
+  .nav-link--active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .utility-nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 1.6vw, 1.5rem);
+    margin-left: auto;
+  }
+
+  .utility-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .utility-link:hover {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 720px) {
+    .site-header {
+      padding-block: var(--space-4) var(--space-5);
+    }
+
+    .site-header__inner {
+      gap: var(--space-3);
+    }
+
+    .primary-nav {
+      order: 3;
+      width: 100%;
+    }
+
+    .utility-nav {
+      gap: var(--space-4);
+    }
+  }
+</style>

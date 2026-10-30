@@ -1,0 +1,299 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ArrowUpRight from '../../components/ArrowUpRight.astro';
+import { identity } from '../../data/site';
+---
+
+<BaseLayout
+  title="Contact — Evan Zellner"
+  description="Email, LinkedIn, and GitHub. The reliable ways to reach Evan Zellner."
+  active="contact"
+  path="/contact/"
+>
+  <div class="shell">
+    <PageHeader
+      eyebrow="Contact"
+      title="Say hello."
+      lede="Email is the most reliable route. LinkedIn works for anything professional; GitHub for anything that belongs in a repository."
+    />
+
+    <div class="contact">
+      <section class="panel" aria-labelledby="form-title">
+        <h2 class="panel__title" id="form-title">Start an email draft</h2>
+        <p class="panel__note">
+          This form does not send anything. It builds a draft in your own email app and
+          leaves sending to you, so nothing leaves your device until you press send there.
+        </p>
+
+        <form id="contact-form" class="form" novalidate>
+          <div class="field">
+            <label class="field__label" for="name">Your name</label>
+            <input class="field__input" id="name" name="name" type="text" autocomplete="name" required />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="email">Your email</label>
+            <input
+              class="field__input"
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="subject">Subject</label>
+            <input class="field__input" id="subject" name="subject" type="text" />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="message">Message</label>
+            <textarea class="field__input field__input--area" id="message" name="message" rows="6" required
+            ></textarea>
+          </div>
+
+          <div class="form__actions">
+            <button class="button" type="submit">
+              Open email draft
+              <ArrowUpRight size={11} />
+            </button>
+            <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+          </div>
+
+          <p class="form__fallback">
+            If nothing opens, email
+            <a class="inline-link" href={`mailto:${identity.email}`}>{identity.email}</a> directly.
+          </p>
+        </form>
+      </section>
+
+      <aside class="panel panel--aside" aria-labelledby="direct-title">
+        <h2 class="panel__title" id="direct-title">Direct</h2>
+        <ul class="direct">
+          <li>
+            <a class="direct__link" href={`mailto:${identity.email}`}>
+              <span class="direct__label">Email</span>
+              <span class="direct__value">{identity.email}</span>
+              <ArrowUpRight size={11} />
+            </a>
+          </li>
+          <li>
+            <a class="direct__link" href={identity.linkedin} rel="me">
+              <span class="direct__label">LinkedIn</span>
+              <span class="direct__value">linkedin.com/in/evanzellner</span>
+              <ArrowUpRight size={11} />
+            </a>
+          </li>
+          <li>
+            <a class="direct__link" href={identity.github} rel="me">
+              <span class="direct__label">Github</span>
+              <span class="direct__value">github.com/gitdamnit</span>
+              <ArrowUpRight size={11} />
+            </a>
+          </li>
+        </ul>
+        <p class="panel__note">{identity.location} · open to relocating for the right role.</p>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const status = document.getElementById('form-status');
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const data = new FormData(form);
+    const name = String(data.get('name') ?? '').trim();
+    const email = String(data.get('email') ?? '').trim();
+    const subject = String(data.get('subject') ?? '').trim();
+    const message = String(data.get('message') ?? '').trim();
+
+    if (!name || !email || !message) {
+      if (status) status.textContent = 'Please fill in your name, your email, and a message.';
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (status) status.textContent = 'That email address does not look complete.';
+      return;
+    }
+
+    const to = 'evanzellner@outlook.com';
+    const finalSubject = subject || `Website enquiry from ${name}`;
+    const body = `${message}\n\n— ${name}\n${email}`;
+
+    const mailto = `mailto:${to}?subject=${encodeURIComponent(finalSubject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+
+    if (status) {
+      status.textContent = 'Opening your email app with the draft. Nothing has been sent yet.';
+    }
+  });
+</script>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--gap-card);
+    align-items: start;
+    padding-bottom: var(--space-7);
+  }
+
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    padding: clamp(1.25rem, 2.4vw, 2.25rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .panel__title {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .panel__note {
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    color: var(--color-text-muted);
+    max-width: 46ch;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .field__label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .field__input {
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    background: var(--color-bg-deep);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.85rem;
+    width: 100%;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .field__input:focus {
+    border-color: var(--color-accent);
+  }
+
+  .field__input--area {
+    resize: vertical;
+    min-height: 8rem;
+  }
+
+  .form__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-pill);
+    transition: background var(--duration-fast) var(--ease-out);
+  }
+
+  .button:hover {
+    background: var(--color-accent-bright);
+  }
+
+  .form__status {
+    font-size: var(--text-sm);
+    color: var(--color-text-soft);
+  }
+
+  .form__fallback {
+    font-size: var(--text-xs);
+    color: var(--color-text-faint);
+  }
+
+  .inline-link {
+    border-bottom: 1px solid var(--color-line-strong);
+    color: var(--color-text-soft);
+  }
+
+  .inline-link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .direct {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .direct__link {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0 var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-line);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .direct__link:hover {
+    color: var(--color-accent);
+  }
+
+  .direct__label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .direct__value {
+    grid-column: 1;
+    font-size: var(--text-sm);
+    color: var(--color-text-soft);
+    overflow-wrap: anywhere;
+  }
+
+  .direct__link svg {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    align-self: center;
+  }
+
+  @media (max-width: 900px) {
+    .contact {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

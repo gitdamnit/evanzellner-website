@@ -1,0 +1,29 @@
+{
+  "name": "evanzellner-website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal website for Evan Zellner — evanzellner.com",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "check": "astro check",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check:links": "node scripts/check-links.mjs",
+    "test": "npm run check && npm run build && npm run check:links",
+    "og": "node scripts/make-og.mjs",
+    "test:site": "node scripts/test-site.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "astro": "^7.4.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^22.10.0",
+    "playwright": "^1.64.1",
+    "typescript": "^5.7.0"
+  }
+}

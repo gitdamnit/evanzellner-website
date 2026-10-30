@@ -1,0 +1,70 @@
+/* Design tokens for evanzellner.com. Components consume these variables only;
+   no component hard-codes a palette value. Palette follows the approved
+   "dark olive + lime" home design (see DECISION_LOG D-0004). */
+
+:root {
+  /* Colour — near-black olive ground, lime accent, warm paper text */
+  --color-bg: #0c0d0a;
+  --color-bg-deep: #080906;
+  --color-surface: #1b1f18;
+  --color-surface-raised: #23281f;
+  --color-line: #2f342a;
+  --color-line-strong: #414738;
+  --color-text: #f0f2e8;
+  --color-text-soft: #cbd0c0;
+  --color-text-muted: #a2a897;
+  --color-text-faint: #8f9584;
+  --color-accent: #d8f76b;
+  --color-accent-bright: #e4ff86;
+  --color-accent-ink: #12150c;
+
+  /* Light "paper" surface used by the résumé document */
+  --color-paper: #f6f5ef;
+  --color-paper-ink: #191b15;
+  --color-paper-muted: #565a4e;
+  --color-paper-faint: #6d7163;
+  --color-paper-rule: #dcdcd1;
+
+  /* Type */
+  --font-display: 'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: clamp(0.95rem, 0.92rem + 0.15vw, 1rem);
+  --text-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
+  --text-xl: clamp(1.6rem, 1.3rem + 1.4vw, 2.35rem);
+  --text-2xl: clamp(2rem, 1.5rem + 2.2vw, 3.25rem);
+  --text-hero: clamp(2.85rem, 1.4rem + 6vw, 6.25rem);
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  --gutter: clamp(1rem, 3vw, 2.5rem);
+  --container: 84rem;
+  --measure: 62ch;
+  --measure-tight: 46ch;
+
+  /* Shape and motion */
+  --radius-card: 14px;
+  --radius-pill: 999px;
+  --radius-sm: 4px;
+  --gap-card: clamp(0.75rem, 1vw, 1rem);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 140ms;
+  --duration-base: 300ms;
+  --duration-slow: 700ms;
+
+  --header-height: 4rem;
+  --ring: 0 0 0 1px var(--color-line);
+}

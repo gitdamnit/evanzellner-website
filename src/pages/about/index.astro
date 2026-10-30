@@ -1,0 +1,172 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ArrowUpRight from '../../components/ArrowUpRight.astro';
+import StarMark from '../../components/StarMark.astro';
+import { aboutPage, doors } from '../../data/about';
+---
+
+<BaseLayout
+  title="About — Evan Zellner"
+  description="The longer story: where Evan Zellner came from, what he is curious about, and why the projects exist."
+  active="about"
+  path="/about/"
+  ogType="profile"
+>
+  <div class="shell">
+    <PageHeader eyebrow={aboutPage.eyebrow} title={aboutPage.title} lede={aboutPage.lede} />
+
+    <div class="sections">
+      {
+        aboutPage.sections.map((section) => (
+          <section class="section" id={section.id} aria-labelledby={`${section.id}-title`}>
+            <div class="section__aside">
+              <p class="eyebrow">
+                <span class="section__index">{section.index}</span>
+                {section.eyebrow}
+              </p>
+            </div>
+            <div class="section__body">
+              <h2 class="section__title" id={`${section.id}-title`}>
+                {section.title}
+              </h2>
+              {section.paragraphs.map((paragraph) => <p class="section__paragraph">{paragraph}</p>)}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+
+    <section class="doors" aria-labelledby="doors-title">
+      <div class="doors__head">
+        <StarMark size={20} class="doors__mark" />
+        <h2 class="doors__title" id="doors-title">Three other doors.</h2>
+      </div>
+      <ul class="doors__list">
+        {
+          doors.map((door) => (
+            <li>
+              <a class="door" href={door.href}>
+                <span class="door__label">{door.label}</span>
+                <span class="door__description">{door.description}</span>
+                <ArrowUpRight size={11} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .sections {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .section {
+    display: grid;
+    grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+    gap: clamp(1rem, 4vw, 4rem);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .section:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .section__index {
+    color: var(--color-accent);
+    margin-right: var(--space-2);
+  }
+
+  .section__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: var(--measure);
+  }
+
+  .section__title {
+    font-size: var(--text-xl);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  .section__paragraph {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--color-text-soft);
+  }
+
+  .doors {
+    margin-top: var(--space-7);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .doors__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .doors__mark {
+    color: var(--color-accent);
+  }
+
+  .doors__title {
+    font-size: var(--text-lg);
+    font-weight: 500;
+  }
+
+  .doors__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .door {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--duration-fast) var(--ease-out),
+      background var(--duration-fast) var(--ease-out);
+  }
+
+  .door:hover {
+    border-color: var(--color-line-strong);
+    background: var(--color-surface-raised);
+  }
+
+  .door__label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .door__description {
+    grid-column: 1 / -1;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 760px) {
+    .section {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+    }
+  }
+</style>

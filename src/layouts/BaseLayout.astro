@@ -1,0 +1,73 @@
+---
+import '@fontsource-variable/instrument-sans';
+import '@fontsource-variable/newsreader';
+import '../styles/global.css';
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import type { NavKey } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  active: NavKey;
+  /** Path used to build the canonical URL, always with a trailing slash. */
+  path: string;
+  ogType?: 'website' | 'article' | 'profile';
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description,
+  active,
+  path,
+  ogType = 'website',
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const canonical = new URL(path, Astro.site ?? 'https://evanzellner.com').href;
+const ogImage = new URL('/og-default.png', Astro.site ?? 'https://evanzellner.com').href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0c0d0a" />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Evan Zellner" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <link rel="me" href="https://github.com/gitdamnit" />
+    <link rel="me" href="https://www.linkedin.com/in/evanzellner" />
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header active={active} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
