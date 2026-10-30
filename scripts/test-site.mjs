@@ -76,6 +76,24 @@ const browser = await chromium.launch();
     ? pass('photograph panel never overlaps the copy')
     : fail(`photograph panel overlaps the copy by ${Math.round(layout.overlap)}px`);
 
+  // The photograph must be shown whole and must not be magnified. The source
+  // files are ~330 px wide, so any real upscale is visible mush.
+  const sizing = await page.evaluate(() => {
+    const img = document.querySelector('.hero-card__photo.is-active');
+    if (!img) return null;
+    const box = img.getBoundingClientRect();
+    const scale = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
+    return {
+      fits: img.naturalWidth * scale <= box.width + 1 && img.naturalHeight * scale <= box.height + 1,
+      upscale: scale,
+      source: `${img.naturalWidth}x${img.naturalHeight}`,
+      drawn: `${Math.round(img.naturalWidth * scale)}x${Math.round(img.naturalHeight * scale)}`,
+    };
+  });
+  sizing && sizing.fits && sizing.upscale <= 1.05
+    ? pass(`photograph shown whole, no crop, ${(sizing.upscale * 100).toFixed(0)}% of ${sizing.source}`)
+    : fail(`photograph cropped or upscaled: ${JSON.stringify(sizing)}`);
+
   // Typing must not change the hero height.
   const heights = await page.evaluate(() => {
     const typed = document.querySelector('[data-typed]');

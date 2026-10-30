@@ -30,7 +30,7 @@ export const loadPhotos = async (): Promise<Photo[]> => {
         src: image,
         width: image.width,
         format: 'webp',
-        quality: 74,
+        quality: 88,
       });
 
       return {

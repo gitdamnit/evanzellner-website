@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** d5affc4a2c3d964b77a86a3f6c304905d1d1265b
+- **Observed commit:** a7ae8ac146e09543882e8435677068db3eab3704
 - **Observed working tree:** dirty
-- **Observed at:** 2026-10-30T16:31:38Z
+- **Observed at:** 2026-10-30T16:41:02Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -50,7 +50,8 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Tested] `https://evanzellner.com/` returns 200 from GitHub, serves the correct `<title>`, redirects `http`→`https` and `www`→apex, and passes all assertions — `TEST_BASE_URL=https://evanzellner.com npm run test:site`, 30 Oct 2026
 - [Implemented] Homepage hero cycles 63 photographs of the owner as film characters every 15 s and types/erases five roles after "Hi. I'm" — `src/data/moviestar.ts`, `src/pages/index.astro` (D-0011, FR-11)
 - [Implemented] Hero is a two-column card: copy on the left, photographs in their own right-hand panel, so a picture is never cut by the text; contrast is 15.32:1 by construction — `src/pages/index.astro` (D-0012)
-- [Tested] Hero: greeting in HTML, role in HTML before JavaScript, 63 photographs all resolve, panel never overlaps the copy at 1280 px or 390 px, height stable while typing — `scripts/test-site.mjs`
+- [Implemented] Photographs are shown whole with `object-fit: contain`, no zoom at rest or on hover, WebP at quality 88 and intrinsic width (D-0013)
+- [Tested] Hero: greeting in HTML, role in HTML before JavaScript, 63 photographs all resolve, panel never overlaps the copy at 1280 px or 390 px, photograph shown whole with no crop and ≤105% scale, height stable while typing — `scripts/test-site.mjs`
 - [Tested] Hero fallbacks: reduced motion keeps the first role static and removes the caret; JavaScript off renders the role, loads the first photograph, and hides the caret — `scripts/test-site.mjs`
 
 ## Tests
@@ -60,7 +61,7 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 | Type, template, and integrity check | `npx astro check` | Pass (23 files, 0 errors, 0 warnings, 0 hints) | local run, 30 Oct 2026 |
 | Production build | `npm run build` | Pass (6 pages) | `dist/` |
 | Internal links, assets, anchors | `npm run check:links` | Pass (75 links, 22 assets, 0 failures) | local run, 30 Oct 2026 |
-| Functional suite | `npm run test:site` | Pass (27 assertions) | `scripts/test-site.mjs`, 30 Oct 2026 |
+| Functional suite | `npm run test:site` | Pass (28 assertions) | `scripts/test-site.mjs`, 30 Oct 2026 |
 | External repository and release links | manual `curl` sweep | Pass (15 URLs, all 200) | local run, 30 Oct 2026 |
 | Contrast | computed WCAG ratios for every text/surface pair | Pass (lowest 4.76:1, body text 14.79:1) | local calculation, 30 Oct 2026 |
 | Visual sweep | Playwright captures at 1440 px and 390 px | Pass (7 captures, no overflow, no console errors) | local run, 30 Oct 2026 |

@@ -339,21 +339,12 @@ const jsonLd = {
     top: 0;
     right: 0;
     bottom: 0;
-    width: 42%;
+    width: 44%;
     z-index: 1;
     overflow: hidden;
+    /* Same lime as the card, so the letterboxing object-fit: contain leaves
+       around a picture is invisible. */
     background: var(--color-accent);
-  }
-
-  /* Softens the seam between the lime field and the photograph. */
-  .hero-card__media::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 30px;
-    z-index: 1;
-    background: linear-gradient(90deg, var(--color-accent), transparent);
-    pointer-events: none;
   }
 
   .hero-card__photo {
@@ -361,23 +352,16 @@ const jsonLd = {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    /* Keep faces in frame: bias the crop towards the top of the picture. */
-    object-position: 50% 26%;
+    /* Whole picture, never cropped and never magnified: the source files are
+       only ~330 px wide, so any zoom shows as mush. The box is filled and the
+       image is letterboxed inside it, which stays invisible on a lime card. */
+    object-fit: contain;
     opacity: 0;
-    transform: scale(1.02);
-    transition:
-      opacity 1200ms var(--ease-out),
-      transform 9000ms linear;
+    transition: opacity 1200ms var(--ease-out);
   }
 
   .hero-card__photo.is-active {
     opacity: 1;
-    transform: scale(1.06);
-  }
-
-  .hero-card:hover .hero-card__photo.is-active {
-    transform: scale(1.1);
   }
 
   .hero-card__name {
@@ -581,13 +565,11 @@ const jsonLd = {
       position: relative;
       inset: auto;
       width: 100%;
-      height: 9.5rem;
+      height: auto;
+      /* Match the photographs' landscape shape so they are shown whole. */
+      aspect-ratio: 1.42;
       margin-top: var(--space-5);
       border-radius: 10px;
-    }
-
-    .hero-card__media::before {
-      display: none;
     }
   }
 

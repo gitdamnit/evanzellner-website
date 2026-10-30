@@ -157,3 +157,14 @@ Allowed statuses: `Proposed`, `Accepted`, `Superseded`, `Deprecated`, `Rejected`
 - **Rationale:** A photograph can never be cut by text that is not on top of it, and contrast becomes structural rather than a property of the image. The panel also crops landscape sources to a portrait slot, which keeps heads centred instead of slicing the top off.
 - **Consequences:** Contrast is 15.32:1 by construction (lime `#d8f76b` on ink `#12150c`). `scripts/test-site.mjs` asserts the panel and the copy never overlap at 1280 px and at 390 px, and that the hero's height does not change while the role is typing. A longer role than the current longest would need the type scale or the column width revisited.
 - **Supersedes:** D-0011 (layout only; rotation, typing, reduced-motion handling, and the build-time image pipeline are unchanged)
+
+### D-0013 — Show hero photographs whole, never cropped and never magnified
+
+- **Date:** 2026-10-30
+- **Status:** Accepted
+- **Context:** D-0012 gave the photographs a right-hand panel but filled it with `object-fit: cover`, plus a resting `scale(1.06)` and a `scale(1.1)` on hover. The panel measures 307×383 (aspect 0.80) while the sources are landscape 1.43, so `cover` upscaled every picture 1.65× and then discarded 44% of its width; the resting scale removed another 6%. The owner's report was that the pictures were zoomed in and had lost quality, which the measured numbers confirmed.
+- **Alternatives Considered:** Keep `cover` and tune `object-position` (rejected: no crop origin recovers 44% of the frame); render each picture at its intrinsic size only, with no filling (rejected: the pictures would visibly change size between frames, from 245 px to 380 px wide); regenerate the photographs at a higher resolution (not possible: the supplied originals are ~330 px wide).
+- **Decision:** The photographs use `object-fit: contain` inside an absolutely positioned panel, with no `transform` at rest or on hover. The panel keeps the card's lime background so the letterboxing `contain` leaves is invisible. On mobile the panel uses `aspect-ratio: 1.42` to match the landscape sources. WebP quality rises from 74 to 88, still at intrinsic width so nothing is resampled smaller.
+- **Rationale:** `contain` cannot crop, and drawing at or below 100% of native cannot soften the image. Both failure modes the owner reported are removed by construction rather than by tuning a crop.
+- **Consequences:** A photograph is letterboxed inside the panel and different sources therefore appear at slightly different sizes; a portrait source shows smaller than a landscape one. Measured across 390, 1280, 1440, 1920, and 2560 px: 0% cropped, 0–3.3% upscale (the worst case is at 820 px, where the card is widest relative to its height). `scripts/test-site.mjs` now fails if the active photograph does not fit its panel or is scaled above 105%.
+- **Supersedes:** None (refines the crop behaviour of D-0012)
