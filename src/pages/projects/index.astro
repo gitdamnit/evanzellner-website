@@ -7,6 +7,7 @@ import {
   inDevelopmentProjects,
   projectCounts,
 } from '../../data/projects';
+import { href } from '../../lib/paths';
 
 const sections = [
   {
@@ -93,6 +94,12 @@ const sections = [
                 </div>
 
                 <div class="project__links">
+                  {project.caseStudy && (
+                    <a class="project__link project__link--study" href={href(project.caseStudy)}>
+                      Case study
+                      <ArrowUpRight size={10} />
+                    </a>
+                  )}
                   {project.repo && (
                     <a class="project__link" href={project.repo} rel="noopener">
                       Repository

@@ -1,0 +1,492 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import ArrowUpRight from '../../../components/ArrowUpRight.astro';
+import { href } from '../../../lib/paths';
+
+const meta = [
+  { label: 'Role', value: 'Design and implementation' },
+  { label: 'Year', value: '2026' },
+  { label: 'Status', value: 'v1.1.0 · October 2026' },
+  { label: 'Licence', value: 'GPL-3.0-only' },
+];
+
+const stack = ['PHP 8', 'Bludit 3.22', 'JavaScript', 'OpenAI-compatible APIs'];
+
+const links = [
+  { label: 'Repository', url: 'https://github.com/gitdamnit/bludit-wizard' },
+  {
+    label: 'Release v1.1.0',
+    url: 'https://github.com/gitdamnit/bludit-wizard/releases/tag/v1.1.0',
+  },
+  {
+    label: 'Download ZIP',
+    url: 'https://github.com/gitdamnit/bludit-wizard/releases/download/v1.1.0/bludit-wizard-1.1.0.zip',
+  },
+];
+
+const sections = [
+  {
+    id: 'problem',
+    index: '01',
+    eyebrow: 'The problem',
+    title: 'The work happened in the wrong window.',
+    paragraphs: [
+      'Writing and editing inside a CMS means leaving the page you are working on: open a chat window, paste the content, explain the context again, copy the result back, and hope you kept the original. The context is lost, the diff is invisible, and it is far too easy to overwrite a newer edit.',
+      'Most AI publishing tools solve that by taking over the publishing step. That is the wrong trade for a site owner who wants assistance, not an autonomous editor. The plugin needed to be useful inside the admin area while leaving every decision with the person who owns the site.',
+    ],
+  },
+  {
+    id: 'approach',
+    index: '02',
+    eyebrow: 'The approach',
+    title: 'Assistance inside the CMS, with the approval step intact.',
+    paragraphs: [
+      'Bludit Wizard is a native PHP plugin that runs inside the Bludit admin, not a separate service. It talks directly to an OpenAI-compatible endpoint configured by the site owner, so no third party holds the site credentials or the content.',
+      'Twelve tasks are grouped into Write & Create, Edit & Improve, SEO & Quality, and Ask Wizard. Tasks that touch content select a real Bludit page first and receive only that page’s context. The result is rendered as original and proposed content side by side; applying it is a separate, explicit action.',
+      'Analysis tasks — SEO and clarity, internal links, content freshness — are read-only. Page deletion is not implemented at all. Server-side request handling keeps the provider key out of the browser, and a configurable network policy blocks private address ranges unless the owner deliberately opts in.',
+    ],
+  },
+  {
+    id: 'features',
+    index: '03',
+    eyebrow: 'What it does',
+    title: 'Twelve tasks, one approval boundary.',
+    list: [
+      'Twelve guided tasks across writing, editing, SEO, and question answering',
+      'Page selection and task-specific instructions for every page-aware task',
+      'Original and proposed content shown together before an edit is applied',
+      'Stale-edit protection and a deliberate no-deletion policy',
+      'Read-only SEO, internal-link, and content-freshness audits',
+      'Provider presets, searchable model discovery, and a connection test',
+      'Safe behaviour when JavaScript or a versioned asset fails to load',
+    ],
+  },
+  {
+    id: 'challenges',
+    index: '04',
+    eyebrow: 'What was hard',
+    title: 'Four things that were not obvious until they broke.',
+    items: [
+      {
+        title: 'Making review feel like part of the work',
+        detail:
+          'A confirmation dialog is easy to ignore. The review step had to show the actual difference, keep the original readable, and make the consequence of applying a change obvious without turning every task into a form.',
+      },
+      {
+        title: 'The RC1 dispatch regression',
+        detail:
+          'The first 1.1.0 release candidate lost a hidden action field. When JavaScript failed or a stale asset was cached, the workspace returned an unknown-action error and the page selector stayed hidden. RC2 fixed the dispatch path and versioned every asset so an old script cannot silently pair with new markup.',
+      },
+      {
+        title: 'Provider compatibility is a surface, not a checkbox',
+        detail:
+          'OpenAI-compatible APIs differ in model discovery, tool support, and error shapes. OpenRouter and LLM Gateway were verified in live use; other providers remain compatibility guesses until someone tests them.',
+      },
+      {
+        title: 'Network safety inside a CMS',
+        detail:
+          'A provider URL is user-controlled input. The plugin validates destinations, refuses private address ranges by default, and fails closed on DNS truncation rather than silently resolving somewhere unexpected.',
+      },
+    ],
+  },
+  {
+    id: 'lessons',
+    index: '05',
+    eyebrow: 'What I learned',
+    title: 'Four things worth keeping.',
+    list: [
+      'Human approval is a product feature, not a disclaimer. It has to be fast and legible, or people will route around it.',
+      'Version every front-end asset. The failure mode is not the bug — it is an old script running against new markup.',
+      'Test the installed ZIP, not only the working tree. The package and both Bludit editions are part of the product.',
+      '“No page deletion” removed a class of catastrophic mistakes and made the rest of the interface easier to reason about.',
+    ],
+  },
+];
+
+const status = [
+  'v1.1.0 is a stable public release on GitHub, licensed GPL-3.0-only, with the installable ZIP attached. The release gate covered 441 HTTP, API, security, and task checks, 33 Playwright tests on Bludit Community and 33 on Bludit Pro, 98 network-policy assertions, and an installed-ZIP browser smoke test on both editions.',
+  'The plugin was submitted to the official Bludit plugin directory. The pull request is open and has not been accepted, so the project is not described as officially listed.',
+  'Live acceptance of all twelve tasks, provider discovery, and testing was performed by the maintainer on a disposable Hostinger installation. That acceptance is reported, not independently re-run by a second party.',
+];
+
+const gaps = [
+  'Bludit plugin-directory acceptance is pending; the listing is not live.',
+  'Only OpenRouter and LLM Gateway were verified in live provider use.',
+  'No independent security audit has been performed.',
+];
+---
+
+<BaseLayout
+  title="Bludit Wizard — case study — Evan Zellner"
+  description="AI-assisted writing, editing, and SEO work inside Bludit — with a human approval step before anything changes. A case study."
+  active="projects"
+  path="/projects/bludit-wizard/"
+>
+  <div class="shell">
+    <p class="back">
+      <a class="rule-link" href={href('/projects/')}>All projects</a>
+    </p>
+
+    <PageHeader
+      eyebrow="Case study"
+      title="Bludit Wizard"
+      lede="AI-assisted writing, editing, and SEO work inside Bludit — with a human approval step before anything changes."
+    />
+
+    <ul class="meta">
+      {
+        meta.map((item) => (
+          <li class="meta__item">
+            <span class="meta__label">{item.label}</span>
+            <span class="meta__value">{item.value}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="intro">
+      <p class="intro__paragraph">
+        Bludit Wizard is a native plugin that lives in the Bludit admin sidebar. It turns a short
+        instruction into a draft, a revision, or an audit, then shows the original and proposed
+        content side by side. Nothing is saved or published until the publisher approves it.
+      </p>
+      <p class="intro__paragraph">
+        It is deliberately not an autonomous site manager. There is no page deletion, no scheduled
+        publishing, and no background loop. The plugin connects only to the OpenAI-compatible
+        endpoint the site owner configures, and the provider key stays on the server.
+      </p>
+      <p class="intro__paragraph">
+        The goal was not to add AI to a CMS for its own sake. It was to remove the copy-and-paste
+        loop between a chat window and the page editor without giving up the diff.
+      </p>
+    </div>
+
+    <ul class="chips" aria-label="Technology">
+      {stack.map((item) => <li class="chip">{item}</li>)}
+    </ul>
+
+    <figure class="shot">
+      <img
+        src={href('/screenshots/bludit-wizard/workspace.png')}
+        alt="The Bludit Wizard workspace inside the Bludit admin, showing a task selector, page selector, and instruction field."
+        width="1280"
+        height="780"
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption>
+        The wizard workspace inside Bludit. Tasks that change content require a page and an
+        instruction.
+      </figcaption>
+    </figure>
+
+    <div class="sections">
+      {
+        sections.map((section) => (
+          <section class="section" id={section.id} aria-labelledby={`${section.id}-title`}>
+            <div class="section__aside">
+              <p class="eyebrow">
+                <span class="section__index">{section.index}</span>
+                {section.eyebrow}
+              </p>
+            </div>
+            <div class="section__body">
+              <h2 class="section__title" id={`${section.id}-title`}>
+                {section.title}
+              </h2>
+
+              {section.paragraphs?.map((paragraph) => (
+                <p class="section__paragraph">{paragraph}</p>
+              ))}
+
+              {section.list && (
+                <ul class="section__list">
+                  {section.list.map((item) => <li>{item}</li>)}
+                </ul>
+              )}
+
+              {section.items && (
+                <dl class="section__items">
+                  {section.items.map((item) => (
+                    <>
+                      <dt>{item.title}</dt>
+                      <dd>{item.detail}</dd>
+                    </>
+                  ))}
+                </dl>
+              )}
+            </div>
+          </section>
+        ))
+      }
+
+      <section class="section" id="status" aria-labelledby="status-title">
+        <div class="section__aside">
+          <p class="eyebrow"><span class="section__index">06</span>Status and limits</p>
+        </div>
+        <div class="section__body">
+          <h2 class="section__title" id="status-title">What is true today, and what is not.</h2>
+          {status.map((paragraph) => <p class="section__paragraph">{paragraph}</p>)}
+          <h3 class="section__subhead">Known gaps</h3>
+          <ul class="section__list">
+            {gaps.map((gap) => <li>{gap}</li>)}
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <figure class="shot">
+      <img
+        src={href('/screenshots/bludit-wizard/review.png')}
+        alt="Side-by-side original and proposed content with Apply this change and Discard suggestion buttons."
+        width="991"
+        height="778"
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption>
+        Original and proposed content, with apply and discard as separate actions.
+      </figcaption>
+    </figure>
+
+    <section class="links" aria-labelledby="links-title">
+      <h2 class="links__title" id="links-title">Where to find it</h2>
+      <ul class="links__list">
+        {
+          links.map((link) => (
+            <li>
+              <a class="link-row" href={link.url} rel="noopener">
+                <span>{link.label}</span>
+                <ArrowUpRight size={11} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="links__note">
+        Status, version, and links were checked against GitHub on 18 October 2026.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .back {
+    padding-top: var(--space-2);
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-5) 0;
+    border-block: 1px solid var(--color-line);
+    margin-bottom: var(--space-6);
+  }
+
+  .meta__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .meta__label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-faint);
+  }
+
+  .meta__value {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: var(--measure);
+    margin-bottom: var(--space-5);
+  }
+
+  .intro__paragraph {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--color-text-soft);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+  }
+
+  .shot {
+    margin: 0 0 var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .shot img {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .shot figcaption {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    max-width: var(--measure);
+  }
+
+  .sections {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .section {
+    display: grid;
+    grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+    gap: clamp(1rem, 4vw, 4rem);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .section__index {
+    color: var(--color-accent);
+    margin-right: var(--space-2);
+  }
+
+  .section__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: var(--measure);
+  }
+
+  .section__title {
+    font-size: var(--text-xl);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  .section__subhead {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-top: var(--space-2);
+  }
+
+  .section__paragraph {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--color-text-soft);
+  }
+
+  .section__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: 1.6;
+    color: var(--color-text-soft);
+  }
+
+  .section__list li {
+    position: relative;
+    padding-left: var(--space-5);
+  }
+
+  .section__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  .section__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .section__items dt {
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+  }
+
+  .section__items dd {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: 1.65;
+    color: var(--color-text-soft);
+  }
+
+  .links {
+    margin-top: var(--space-7);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .links__title {
+    font-size: var(--text-lg);
+    font-weight: 500;
+  }
+
+  .links__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text-soft);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  .link-row:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .links__note {
+    font-size: var(--text-sm);
+    color: var(--color-text-faint);
+  }
+
+  @media (max-width: 760px) {
+    .section {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+    }
+  }
+</style>

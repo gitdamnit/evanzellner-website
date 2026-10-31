@@ -29,12 +29,15 @@ export interface ProjectEntry {
   /** ISO date of the last push observed via the GitHub API. */
   lastPushed: string;
   note?: string;
+  /** Internal path to a written case study, when one exists. */
+  caseStudy?: string;
 }
 
 export const completedProjects: ProjectEntry[] = [
   {
     id: 'bludit-wizard',
     title: 'Bludit Wizard',
+    caseStudy: '/projects/bludit-wizard/',
     summary:
       'AI-assisted writing, editing, SEO analysis, and content management for Bludit CMS — twelve guided tasks, each with a human-reviewed change before anything publishes.',
     stack: ['PHP 8', 'Bludit 3.22', 'JavaScript'],

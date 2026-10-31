@@ -212,3 +212,14 @@ Allowed statuses: `Proposed`, `Accepted`, `Superseded`, `Deprecated`, `Rejected`
 - **Rationale:** Reverting the files to a known-good commit is more reliable than unpicking five layered changes by hand, and it guarantees the deployed markup matches what was verified before the photographs existed.
 - **Consequences:** The originals remain on disk at `~/Desktop/evan-moviestar/` and in Git history (`d5affc4` onward), so nothing is destroyed. The character/caption table and the review trail live on in D-0015 and that history but no longer ship. Dropping the asterisk and caption leaves the hero with a single line of type; both are a one-line change if they are ever wanted back.
 - **Supersedes:** D-0011, D-0012, D-0013, D-0014, D-0015
+
+### D-0018 — Publish the first project case study
+
+- **Date:** 2026-10-31
+- **Status:** Accepted
+- **Context:** D-0003 kept the Projects page to a linked inventory and listed individual case-study pages as out of scope. The owner has since said the site is "mostly a content thing" and that a portfolio is what decides callbacks for interface work, so a list of names and one-line summaries is not enough. The Bludit Wizard write-up already existed, complete, in the previous build.
+- **Alternatives Considered:** Publish all nine case studies at once (rejected: nine unread pages before one has been judged); keep the inventory only (rejected: the owner explicitly asked for a case study); build a general `[slug]` content collection for nine pages (rejected: machinery for pages that do not exist yet, and the layout is unproven); paste the raw markdown in (rejected: a wall of text is a poor portfolio piece).
+- **Decision:** `src/pages/projects/bludit-wizard/` renders the existing write-up as a designed page: title, tagline, metadata band (role, year, status, licence), a technology row, both product screenshots with captions, and numbered sections for problem, approach, features, what was hard, what was learned, and status with its known gaps. The Projects list gains a "Case study" link on that row, driven by an optional `caseStudy` field on the project entry. The page is added to the sitemap.
+- **Rationale:** One finished page proves the layout and the tone before eight more are written, and it gives the owner something real to react to instead of another proposal.
+- **Consequences:** The Projects inventory and the case-study page must not disagree about status; both currently say v1.1.0. The page reports its own limits (plugin directory not accepted, only two providers verified, no independent audit), which is deliberate. Future case studies can reuse this layout — it is written per page rather than as a collection, so the second one is a copy and edit.
+- **Supersedes:** D-0003 (individual case-study pages are now in scope; the inventory remains the index)

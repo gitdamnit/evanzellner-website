@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-const pages = ['/', '/projects/', '/resume/', '/about/', '/contact/'];
+const pages = ['/', '/projects/', '/projects/bludit-wizard/', '/resume/', '/about/', '/contact/'];
 
 export const GET: APIRoute = ({ site }) => {
   const origin = site ?? new URL('https://evanzellner.com');
