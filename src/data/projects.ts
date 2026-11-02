@@ -64,6 +64,7 @@ export const completedProjects: ProjectEntry[] = [
   {
     id: 'prodoc-guard',
     title: 'ProDoc Guard',
+    caseStudy: '/projects/prodoc-guard/',
     summary:
       'Project memory that lives in Git, not in an AI’s head: a vendor-neutral Agent Skill and offline CLI that keeps requirements, decisions, and status present and honest across sessions.',
     stack: ['Python 3', 'Agent Skills', 'Git'],

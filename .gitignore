@@ -25,3 +25,6 @@ evanzellner.com/
 
 # Local editorial drafts that must never be published
 editorial/
+
+# Git That Shit shadow repository (local tooling state)
+.git-that-shit/

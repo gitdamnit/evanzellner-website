@@ -10,9 +10,9 @@ In Progress
 <!-- prodoc:observed:start -->
 <!-- Observed from Git metadata only, by `prodoc update`. This block is not evidence that the implementation or its tests are correct; record that under `## Verification Evidence`. -->
 - **Observed branch:** main
-- **Observed commit:** 88fd1574a227b571bc2fc5d0b115b19d2810fa58
+- **Observed commit:** cee4b141e847bc911492ca8216d464b6ea39cbf5
 - **Observed working tree:** dirty
-- **Observed at:** 2026-10-31T17:19:25Z
+- **Observed at:** 2026-11-02T02:16:11Z
 <!-- prodoc:observed:end -->
 
 ## Verification Evidence
@@ -48,6 +48,7 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 - [Implemented] `BASE_PATH` removed from the Pages workflow and `deploy/CNAME` copied to `public/CNAME`, so builds serve from `/` — `.github/workflows/pages.yml`, `public/CNAME`
 - [Deployed] GitHub Pages custom domain set to `evanzellner.com` with a certificate covering apex and `www`; "Enforce HTTPS" enabled — repository Pages settings, 30 Oct 2026
 - [Tested] `https://evanzellner.com/` returns 200 from GitHub, serves the correct `<title>`, redirects `http`→`https` and `www`→apex, and passes all assertions — `TEST_BASE_URL=https://evanzellner.com npm run test:site`, 30 Oct 2026
+- [Implemented] Second case study published for ProDoc Guard, using real captured CLI output in place of screenshots; linked from the Projects list and the sitemap (D-0019) — `src/pages/projects/prodoc-guard/index.astro`
 - [Implemented] First project case study published for Bludit Wizard, with both product screenshots and an explicit limits section; linked from the Projects list and the sitemap (D-0018) — `src/pages/projects/bludit-wizard/index.astro`, `src/data/projects.ts`
 - [Implemented] Homepage hero is the plain lime card again: "Evan Zellner." and nothing else; all 63 moviestar photographs and their caption data are deleted (D-0017) — `src/pages/index.astro`
 - [Implemented] About page replaced with the owner's first-person copy, verbatim, in four sections; the "Three other doors" block is removed (D-0016) — `src/data/about.ts`, `src/pages/about/index.astro`
@@ -57,8 +58,8 @@ Environment: Node 22.23.2, npm 10.9.8, Astro 7.4, Chromium via Playwright 1.64.
 | Suite | Command | Result | Evidence |
 | --- | --- | --- | --- |
 | Type, template, and integrity check | `npx astro check` | Pass (23 files, 0 errors, 0 warnings, 0 hints) | local run, 30 Oct 2026 |
-| Production build | `npm run build` | Pass (7 pages) | `dist/` |
-| Internal links, assets, anchors | `npm run check:links` | Pass (84 links, 28 assets, 0 failures) | local run, 31 Oct 2026 |
+| Production build | `npm run build` | Pass (8 pages) | `dist/` |
+| Internal links, assets, anchors | `npm run check:links` | Pass (96 links, 32 assets, 0 failures) | local run, 1 Nov 2026 |
 | Functional suite | `npm run test:site` | Pass (15 assertions) | `scripts/test-site.mjs`, 31 Oct 2026 |
 | External repository and release links | manual `curl` sweep | Pass (15 URLs, all 200) | local run, 30 Oct 2026 |
 | Contrast | computed WCAG ratios for every text/surface pair | Pass (lowest 4.76:1, body text 14.79:1) | local calculation, 30 Oct 2026 |

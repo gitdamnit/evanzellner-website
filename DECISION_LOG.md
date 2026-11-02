@@ -223,3 +223,14 @@ Allowed statuses: `Proposed`, `Accepted`, `Superseded`, `Deprecated`, `Rejected`
 - **Rationale:** One finished page proves the layout and the tone before eight more are written, and it gives the owner something real to react to instead of another proposal.
 - **Consequences:** The Projects inventory and the case-study page must not disagree about status; both currently say v1.1.0. The page reports its own limits (plugin directory not accepted, only two providers verified, no independent audit), which is deliberate. Future case studies can reuse this layout — it is written per page rather than as a collection, so the second one is a copy and edit.
 - **Supersedes:** D-0003 (individual case-study pages are now in scope; the inventory remains the index)
+
+### D-0019 — Publish the ProDoc Guard case study, with real CLI output instead of screenshots
+
+- **Date:** 2026-11-01
+- **Status:** Accepted
+- **Context:** D-0018 established the case-study layout with Bludit Wizard, which had two genuine product screenshots. ProDoc Guard is a command-line tool: there is no interface to photograph, and none of the old builds contained images for it. The owner asked for this case study next.
+- **Alternatives Considered:** Publish with no visual at all (rejected: a page of prose with nothing to look at is a weak portfolio piece); mock up a terminal in an image editor (rejected: a fabricated screenshot is the opposite of what this project is about); screenshot a styled HTML block and present it as a terminal (rejected: the same problem in a nicer costume); use real captured output as a code block (chosen).
+- **Decision:** The page reuses the D-0018 layout and metadata band, and replaces the screenshot slot with a terminal block containing output actually captured from `prodoc check` running against this website's own repository on 1 November 2026, captioned as such and explained as a warning rather than a failure.
+- **Rationale:** ProDoc Guard's entire argument is that claims should carry artefacts. Publishing a mockup to illustrate that argument would undermine it in the first screen.
+- **Consequences:** The transcript is a snapshot and will drift as the repository changes; the caption dates it and explains what the warning means so a stale commit hash does not read as a defect. The `dd` margins were normalised in both case studies so challenge descriptions align with their titles.
+- **Supersedes:** None
